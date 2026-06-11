@@ -30,18 +30,17 @@ jobs:
       # 4. Compilar el entorno esp32dev para generar el binario
       - name: Compilar Proyecto para ESP32
         run: pio run -e esp32dev
-
       # 5. Instalar Wokwi CLI
       - name: Instalar Wokwi CLI
         run: curl -L https://wokwi.com/ci/install.sh | sh
 
-      # 6. Validar que el archivo diagram.json no tenga errores
+      # 6. Validar que el archivo diagram.json no tenga errores (Corregido sin 'bin/')
       - name: Validar Diagrama de Wokwi
-        run: bin/wokwi-cli lint
+        run: wokwi-cli lint
 
-      # 7. Ejecutar la simulación durante 5 segundos
+      # 7. Ejecutar la simulación durante 5 segundos (Corregido sin 'bin/')
       - name: Ejecutar simulación en Wokwi
         run: |
-          bin/wokwi-cli --timeout 5000 --timeout-exit-code 0
+          wokwi-cli --timeout 5000 --timeout-exit-code 0
         env:
           WOKWI_CLI_TOKEN: ${{ secrets.WOKWI_CLI_TOKEN }}
