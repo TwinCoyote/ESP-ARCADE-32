@@ -1,4 +1,4 @@
-name: PlatformIO Build CI
+name: PlatformIO & Wokwi CI
 
 on:
   push:
@@ -7,26 +7,41 @@ on:
     branches: ["main"]
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Descarga el código de tu repositorio
+      # 1. Descargar el código del repositorio
       - name: Checkout del código
         uses: actions/checkout@v4
 
-      # 2. Configura el entorno de Python
+      # 2. Configurar el entorno de Python
       - name: Configurar Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.x"
 
-      # 3. Instala PlatformIO CLI
+      # 3. Instalar PlatformIO
       - name: Instalar PlatformIO
         run: |
           python -m pip install --upgrade pip
           pip install -U platformio
 
-      # 4. Compila el proyecto usando tu archivo platformio.ini
-      - name: Compilar Proyecto con PlatformIO
-        run: pio run
+      # 4. Compilar el entorno esp32dev para generar el binario
+      - name: Compilar Proyecto para ESP32
+        run: pio run -e esp32dev
+
+      # 5. Instalar Wokwi CLI
+      - name: Instalar Wokwi CLI
+        run: curl -L https://wokwi.com/ci/install.sh | sh
+
+      # 6. Validar que el archivo diagram.json no tenga errores
+      - name: Validar Diagrama de Wokwi
+        run: bin/wokwi-cli lint
+
+      # 7. Ejecutar la simulación durante 5 segundos
+      - name: Ejecutar simulación en Wokwi
+        run: |
+          bin/wokwi-cli --timeout 5000 --timeout-exit-code 0
+        env:
+          WOKWI_CLI_TOKEN: ${{ secrets.WOKWI_CLI_TOKEN }}
