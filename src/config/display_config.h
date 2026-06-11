@@ -2,6 +2,10 @@
 
 #include <cstdint>
 
+#define DISPLAY_CONTROLLER_SH1106 1
+#define DISPLAY_CONTROLLER_SSD1306 2
+#define DISPLAY_CONTROLLER DISPLAY_CONTROLLER_SH1106
+
 namespace DisplayConfig
 {
     constexpr int WIDTH = 128;

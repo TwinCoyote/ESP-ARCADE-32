@@ -6,10 +6,10 @@ void SystemManager::begin()
 {
     Serial.begin(115200);
     InitDisplay();
-
     ClearDisplay();
-
     DrawLogo();
+    delay(500);
+    DrawMenu();
 }
 
 void SystemManager::update()

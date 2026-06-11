@@ -1,52 +1,70 @@
 #include <Arduino.h>
-#include <Wire.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
+#include <U8g2lib.h>
 #include "display.h"
-// #include "assets.h"
 #include "../../assets/images/assets.h"
 #include "../../config/display_config.h"
 
 using namespace DisplayConfig;
+static unsigned long waitStart = 0;
+static unsigned long waitDuration = 0;
+static bool waitActive = false;
 
-Adafruit_SSD1306 display(
-    WIDTH,
-    HEIGHT,
-    &Wire,
-    RESET_PIN);
+#if DISPLAY_CONTROLLER == DISPLAY_CONTROLLER_SH1106
+U8G2_SH1106_128X64_NONAME_F_HW_I2C display(U8G2_R0, U8X8_PIN_NONE);
+#else
+U8G2_SSD1306_128X64_NONAME_F_HW_I2C display(U8G2_R0, U8X8_PIN_NONE);
+#endif
 
 void InitDisplay()
 {
-    // Inicializar pantalla (dirección I2C típica 0x3C)
-    if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C))
-    {
-        Serial.println("Failed to initialize display");
-        return;
-    }
-    display.invertDisplay(true); // Invertir display si está al revés
-    display.clearDisplay();
-    display.display();
+    display.begin();
+    display.setContrast(255);
+    display.clearBuffer();
+    display.sendBuffer();
 }
+
 void ClearDisplay()
 {
-    display.clearDisplay();
-    display.display();
+    display.clearBuffer();
+    display.sendBuffer();
 }
 
 void DrawBitmap(const unsigned char *bitmap, int width, int height)
 {
-    display.clearDisplay();
-    display.drawBitmap(0, 0, bitmap, width, height, 1);
-    display.display();
+    display.clearBuffer();
+    display.drawXBMP(0, 0, width, height, bitmap);
+    display.sendBuffer();
 }
 
 void DrawLogo()
 {
-    display.display();
+    display.clearBuffer();
     DrawBitmap(Logo_R, logoWidth, logoHeight);
+    display.sendBuffer();
 }
 
 void DrawMenu()
 {
+    display.clearBuffer();
     DrawBitmap(menu_principal, logoWidth, logoHeight);
+    display.sendBuffer();
+}
+
+bool wait(unsigned long durationMs)
+{
+    unsigned long current = millis();
+
+    if (!waitActive || waitDuration != durationMs) {
+        waitStart = current;
+        waitDuration = durationMs;
+        waitActive = true;
+        return false;
+    }
+
+    if (current - waitStart >= waitDuration) {
+        waitActive = false;
+        return true;
+    }
+
+    return false;
 }

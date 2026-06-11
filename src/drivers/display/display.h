@@ -9,3 +9,5 @@ void DrawBitmap(const unsigned char *bitmap, int w, int h);
 void DrawLogo();
 // Conveniencia: dibuja gráfico de menú principal
 void DrawMenu();
+// Funcion para esperar con millis
+bool wait(unsigned long durationMs);
