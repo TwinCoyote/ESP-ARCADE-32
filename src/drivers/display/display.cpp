@@ -54,14 +54,16 @@ bool wait(unsigned long durationMs)
 {
     unsigned long current = millis();
 
-    if (!waitActive || waitDuration != durationMs) {
+    if (!waitActive || waitDuration != durationMs)
+    {
         waitStart = current;
         waitDuration = durationMs;
         waitActive = true;
         return false;
     }
 
-    if (current - waitStart >= waitDuration) {
+    if (current - waitStart >= waitDuration)
+    {
         waitActive = false;
         return true;
     }

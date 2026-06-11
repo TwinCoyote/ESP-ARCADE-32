@@ -1,0 +1,32 @@
+name: PlatformIO Build CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Descarga el código de tu repositorio
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      # 2. Configura el entorno de Python
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      # 3. Instala PlatformIO CLI
+      - name: Instalar PlatformIO
+        run: |
+          python -m pip install --upgrade pip
+          pip install -U platformio
+
+      # 4. Compila el proyecto usando tu archivo platformio.ini
+      - name: Compilar Proyecto con PlatformIO
+        run: pio run
