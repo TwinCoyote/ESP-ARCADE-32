@@ -1,6 +1,9 @@
 #include "system_manager.h"
 #include <Arduino.h>
 #include "../drivers/display/display.h"
+#include "../ui/menu.h"
+
+bool primeraVez = true;
 
 void SystemManager::begin()
 {
@@ -9,10 +12,24 @@ void SystemManager::begin()
     ClearDisplay();
     DrawLogo();
     delay(500);
+    ClearDisplay();
     DrawMenu();
+    ActDisplay();
+    delay(500);
+    MenuInit();
 }
 
 void SystemManager::update()
 {
-    // Lógica principal del sistema
+    // Actualizamos la lógica y guardamos si el usuario movió el menú
+    bool huboMovimiento = MenuUpdate();
+    
+    // Solo renderizamos si es la primera vez que enciende o si se presionó un botón
+    if (huboMovimiento || primeraVez) 
+    {
+        MenuRender();
+        primeraVez = false; // Ya se dibujó el estado inicial
+    }
+    
+    // Lógica principal del sistema (juegos, etc.)
 }

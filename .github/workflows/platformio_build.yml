@@ -11,34 +11,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Descargar el código del repositorio
       - name: Checkout del código
         uses: actions/checkout@v4
 
-      # 2. Configurar el entorno de Python
       - name: Configurar Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.x"
 
-      # 3. Instalar PlatformIO
       - name: Instalar PlatformIO
         run: |
           python -m pip install --upgrade pip
           pip install -U platformio
 
-      # 4. Compilar el entorno esp32dev para generar el binario
       - name: Compilar Proyecto para ESP32
         run: pio run -e esp32dev
-      # 5. Instalar Wokwi CLI
+
       - name: Instalar Wokwi CLI
         run: curl -L https://wokwi.com/ci/install.sh | sh
 
-      # 6. Validar que el archivo diagram.json no tenga errores (Corregido sin 'bin/')
       - name: Validar Diagrama de Wokwi
         run: wokwi-cli lint
 
-      # 7. Ejecutar la simulación durante 5 segundos (Corregido sin 'bin/')
       - name: Ejecutar simulación en Wokwi
         run: |
           wokwi-cli --timeout 5000 --timeout-exit-code 0

@@ -3,6 +3,7 @@
 #include "display.h"
 #include "../../assets/images/assets.h"
 #include "../../config/display_config.h"
+#include "../../ui/menu.h"
 
 using namespace DisplayConfig;
 static unsigned long waitStart = 0;
@@ -15,6 +16,17 @@ U8G2_SH1106_128X64_NONAME_F_HW_I2C display(U8G2_R0, U8X8_PIN_NONE);
 U8G2_SSD1306_128X64_NONAME_F_HW_I2C display(U8G2_R0, U8X8_PIN_NONE);
 #endif
 
+void SetMenuFont()
+{
+    display.setFont(u8g2_font_ncenB08_tr);
+}
+
+void DrawText(int x, int y, const char *text)
+{
+    display.drawStr(x, y, text);
+    // display.sendBuffer();
+}
+
 void InitDisplay()
 {
     display.begin();
@@ -26,7 +38,7 @@ void InitDisplay()
 void ClearDisplay()
 {
     display.clearBuffer();
-    display.sendBuffer();
+    // display.sendBuffer();
 }
 
 void DrawBitmap(const unsigned char *bitmap, int width, int height)
@@ -45,8 +57,13 @@ void DrawLogo()
 
 void DrawMenu()
 {
-    display.clearBuffer();
+    // display.clearBuffer();
     DrawBitmap(menu_principal, logoWidth, logoHeight);
+    // display.sendBuffer();
+}
+
+void ActDisplay()
+{
     display.sendBuffer();
 }
 
