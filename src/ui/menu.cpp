@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include "drivers/input/buttons.h"
 #include "drivers/display/display.h"
 const char *options[] = {
@@ -16,16 +17,49 @@ void MenuInit()
 
 bool MenuUpdate()
 {
+    bool changed = false;
+
+    // Simple per-button debounce: accept a new press only if
+    // the last accepted press was more than 200 ms ago.
+    static unsigned long lastRightMillis = 0;
+    static unsigned long lastLeftMillis = 0;
+    const unsigned long debounceMs = 200;
+
     if (isPressed(BTN_RIGHT))
-        indexMenu++;
-    if (indexMenu >= totalOptions)
-        indexMenu = 0;
+    {
+        unsigned long now = millis();
+        if (now - lastRightMillis > debounceMs)
+        {
+            indexMenu++;
+            if (indexMenu >= totalOptions)
+                indexMenu = 0;
+            changed = true;
+            lastRightMillis = now;
+            Serial.println("BTN_RIGHT pressed");
+        }
+    }
 
     if (isPressed(BTN_LEFT))
-        indexMenu--;
-    if (indexMenu < 0)
-        indexMenu = totalOptions - 1;
-    return false;
+    {
+        unsigned long now = millis();
+        if (now - lastLeftMillis > debounceMs)
+        {
+            indexMenu--;
+            if (indexMenu < 0)
+                indexMenu = totalOptions - 1;
+            changed = true;
+            lastLeftMillis = now;
+            Serial.println("BTN_LEFT pressed");
+        }
+    }
+
+    if (changed)
+    {
+        Serial.print("indexMenu=");
+        Serial.println(indexMenu);
+    }
+
+    return changed;
 }
 
 void MenuRender()
@@ -34,5 +68,6 @@ void MenuRender()
     DrawMenu();
     SetMenuFont();
     DrawText(44, 35, options[indexMenu]);
+    Serial.println(indexMenu);
     ActDisplay();
 }
