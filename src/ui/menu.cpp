@@ -62,6 +62,36 @@ bool MenuUpdate()
     return changed;
 }
 
+bool MenuConfirm()
+{
+    static unsigned long lastOkMillis = 0;
+    static bool lastOkState = false;
+    const unsigned long debounceMs = 200;
+
+    bool current = isPressed(BTN_OK);
+    unsigned long now = millis();
+
+    if (current && !lastOkState && (now - lastOkMillis > debounceMs))
+    {
+        lastOkMillis = now;
+        lastOkState = true;
+        Serial.println("BTN_OK confirmed");
+        return true;
+    }
+
+    if (!current)
+    {
+        lastOkState = false;
+    }
+
+    return false;
+}
+
+int MenuGetIndex()
+{
+    return indexMenu;
+}
+
 void MenuRender()
 {
     // ClearDisplay();

@@ -15,3 +15,4 @@ bool isPressed(int pin)
 {
     return digitalRead(pin) == LOW;
 }
+
