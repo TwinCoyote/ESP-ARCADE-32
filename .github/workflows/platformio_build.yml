@@ -3,6 +3,8 @@ name: PlatformIO & Wokwi CI
 on:
   push:
     branches: ["main"]
+    tags:
+      - "v*"
   pull_request:
     branches: ["main"]
 
@@ -38,3 +40,20 @@ jobs:
           wokwi-cli --timeout 5000 --timeout-exit-code 0
         env:
           WOKWI_CLI_TOKEN: ${{ secrets.WOKWI_CLI_TOKEN }}
+
+      - name: Crear Release y subir Binario de la Consola
+        if: startsWith(github.ref, 'refs/tags/v') # Condición mágica de GitHub
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            .pio/build/esp32dev/firmware.bin
+            diagram.json
+          name: "Consola de Juegos - Versión ${ { github.ref_name } }"
+          body: |
+            ¡Nueva versión estable de la consola compilada con éxito!
+
+            ### Cambios y Notas:
+            - Firmware validado automáticamente en Wokwi CI de forma exitosa.
+            - Archivo `.bin` listo para flashear en el ESP32.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

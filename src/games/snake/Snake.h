@@ -1,8 +1,8 @@
 #ifndef SNAKE_H
 #define SNAKE_H
 #include <Arduino.h>
-#include "../drivers/display/display.h"
-#include "../drivers/input/buttons.h"
+#include "../../drivers/display/display.h"
+#include "../../drivers/input/buttons.h"
 
 #define ANCHO_PANTALLA 128
 #define ALTO_PANTALLA 64
