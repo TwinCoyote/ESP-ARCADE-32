@@ -9,7 +9,7 @@ bool primeraVez = true;
 void SystemManager::begin()
 {
     Serial.begin(115200);
-    InitButtons();
+    input.begin();
     InitDisplay();
     ClearDisplay();
     DrawLogo();

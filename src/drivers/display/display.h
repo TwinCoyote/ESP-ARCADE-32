@@ -14,3 +14,16 @@ void DrawMenu();
 // Funcion para esperar con millis
 bool wait(unsigned long durationMs);
 void ActDisplay();
+void DrawBox(int x, int y, int l, int w);
+
+#define ANCHO_PANTALLA 128
+#define ALTO_PANTALLA 64
+
+enum FontSize
+{
+    FONT_SMALL,
+    FONT_MEDIUM,
+    FONT_LARGE
+};
+
+void SetCustomFont(FontSize size);
