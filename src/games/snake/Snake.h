@@ -4,9 +4,9 @@
 #include "../../drivers/display/display.h"
 #include "../../drivers/input/buttons.h"
 
-#define ANCHO_PANTALLA 128
-#define ALTO_PANTALLA 64
-#define DIRECCION_OLED 0x3C
+// #define ANCHO_PANTALLA 128
+// #define ALTO_PANTALLA 64
+// #define DIRECCION_OLED 0x3C
 #define LONGITUD_MAXIMA 50
 
 // extern Adafruit_SSD1306 display;

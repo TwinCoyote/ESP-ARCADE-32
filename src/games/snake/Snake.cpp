@@ -1,5 +1,6 @@
 // #include "input.h"
 #include "Snake.h"
+#include "../../drivers/display/display.h"
 
 // #define ANCHO_PANTALLA 128
 // #define ALTO_PANTALLA 64
@@ -214,9 +215,9 @@ void lose_display()
     ActDisplay();
     ClearDisplay();
     SetCustomFont(FONT_MEDIUM);
-    DrawText(4, 5, "Game Over!");
+    DrawText(4, 30, "Game Over!");
     SetCustomFont(FONT_SMALL);
-    DrawText(10, 40, "Volver a Jugar?");
+    DrawText(10, 50, "Volver a Jugar?");
 }
 
 void reset_game()
@@ -257,6 +258,7 @@ void snake_game()
     if (ACTUAL_STATE == states::INIT)
     {
         game_letters();
+        snake_init();
     }
 
     else if (ACTUAL_STATE == states::START)

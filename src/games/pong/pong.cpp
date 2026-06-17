@@ -1,13 +1,14 @@
 #include "pong.h"
 #include "../../drivers/input/buttons.h"
 #include "../../drivers/display/display.h"
+#include "../../assets/images/pong_images/scoreboard.h"
 // #include "states_displays.h" // Todo: Mejorar por codigo y no por bitmap
 
 namespace pong
 {
 
     void ball_init();
-    void ball_start();
+    // void ball_start();
     void move_ball();
 
     int pong_direccion = 1;
@@ -39,6 +40,8 @@ namespace pong
     int user_points = 0;
     int count_user = 0;
     int count_enemy = 0;
+    bool ball_attached = false;
+    bool ball_on_ai = false;
     bool start = false; // TODO: Hacer la condicion de que cuando alguno pierda se le ponga el marcador y
     // TODO -- para eso se necesita el bool start para que indique cuando aparezca y desaparezca
 
@@ -52,11 +55,11 @@ namespace pong
         return ball_y + (ball_velocity * ball_directionY);
     }
 
-    void ball_start()
-    {
-        // Simplemente le da un empujón inicial a la bola si fuera necesario
-        // o cambia la dirección inicial.
-    }
+    // void ball_start()
+    // {
+    //     // Simplemente le da un empujón inicial a la bola si fuera necesario
+    //     // o cambia la dirección inicial.
+    // }
 
     void ball_init()
     {
@@ -64,6 +67,32 @@ namespace pong
         ball_y = ALTO_PANTALLA / 2;
         ball_directionX = (random(0, 2) == 0) ? 1 : -1;
         ball_directionY = (random(0, 2) == 0) ? 1 : -1;
+    }
+    void user_counter()
+    {
+
+        trigger_scoreboard();
+    }
+
+    void ballAttached()
+    {
+        if (ball_on_ai)
+        {
+            ball_x = x_AI - ball_size;
+            ball_y = y_AI + (width - ball_size) / 2;
+        }
+        else
+        {
+            ball_x = x + len_block;
+            ball_y = y + (width - ball_size) / 2;
+        }
+
+        if (isPressed(BTN_OK))
+        {
+            ball_attached = false;
+            ball_directionX = ball_on_ai ? -1 : 1;
+            ball_directionY = 0;
+        }
     }
 
     void move_ball()
@@ -82,18 +111,26 @@ namespace pong
         {
             if (expectedY + ball_size >= y && expectedY <= y + width)
             {
+                int hitCenter = expectedY + ball_size / 2;
+                int paddleCenter = y + width / 2;
+
+                if (hitCenter < paddleCenter - 2)
+                    ball_directionY = -1;
+                else if (hitCenter > paddleCenter + 2)
+                    ball_directionY = 1;
+                else
+                    ball_directionY = 0;
+
                 ball_directionX = 1;
                 expectedX = calcPositionX();
             }
-            else if (expectedX < 0)
+            else if (expectedX < 4)
             {
                 count_user++;
-                // user_counter();
-                if (dir == 5)
-                {
-                    ball_init();
-                    return;
-                }
+                ball_attached = true;
+                ball_on_ai = true;
+                user_counter();
+                return;
             }
         }
 
@@ -101,18 +138,26 @@ namespace pong
         {
             if (expectedY + ball_size >= y_AI && expectedY <= y_AI + width)
             {
+                int hitCenter = expectedY + ball_size / 2;
+                int paddleCenter = y_AI + width / 2;
+
+                if (hitCenter < paddleCenter - 2)
+                    ball_directionY = -1;
+                else if (hitCenter > paddleCenter + 2)
+                    ball_directionY = 1;
+                else
+                    ball_directionY = 0;
+
                 ball_directionX = -1;
                 expectedX = calcPositionX();
             }
-            else if (expectedX > ANCHO_PANTALLA)
+            else if (expectedX > ANCHO_PANTALLA - 4)
             {
                 count_enemy++;
-                // user_counter();
-                if (dir == 5)
-                {
-                    ball_init();
-                    return;
-                }
+                ball_attached = true;
+                ball_on_ai = false;
+                user_counter();
+                return;
             }
         }
 
@@ -182,11 +227,11 @@ namespace pong
         ball_init();
     }
 
-    void user_counter()
-    {
-        // pong_counter(display, count_user, count_enemy);
-        // TODO: Hacer la pantalla de puntuacion
-    }
+    // void end_game(){
+    //     if(count_user >= 10){
+            
+    //     }
+    // }
 
     void game_pong()
     {
@@ -199,10 +244,20 @@ namespace pong
 
         print_player();
         print_AI();
-        move_ball();
+
+        if (ball_attached)
+        {
+            ballAttached();
+        }
+        else
+        {
+            move_ball();
+        }
+
         print_ball();
 
-        // display.display();
+        draw_scoreboard_modal(count_user, count_enemy);
+
         ActDisplay();
         delay(20); // Todo: Actualizar a millis()
     }

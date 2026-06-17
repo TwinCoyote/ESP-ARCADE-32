@@ -3,6 +3,8 @@
 #include "../drivers/display/display.h"
 #include "../ui/menu.h"
 #include "../drivers/input/buttons.h"
+#include "../games/snake/Snake.h"
+#include "../games/pong/pong.h"
 
 bool primeraVez = true;
 
@@ -19,12 +21,14 @@ void SystemManager::begin()
     ActDisplay();
     delay(500);
     MenuInit();
+    pinMode(2, OUTPUT);
 }
 
 void SystemManager::update()
 {
     if (currentState == STATE_MENU)
     {
+        digitalWrite(2, LOW);
         // Actualizamos la lógica y guardamos si el usuario movió el menú
         bool huboMovimiento = MenuUpdate();
 
@@ -40,6 +44,12 @@ void SystemManager::update()
             int valor = MenuGetIndex();
             switch (valor)
             {
+                // case 0:
+                //     currentState = STATE_MENU;
+                //     Serial.println("Switching to Menu");
+
+                //     break;
+
             case 0:
                 currentState = STATE_SNAKE;
                 Serial.println("Switching to Snake");
@@ -67,15 +77,35 @@ void SystemManager::update()
         switch (currentState)
         {
         case STATE_SNAKE:
-            // Actualiza o inicia Snake
+            if (MenuBack())
+            {
+                currentState = STATE_MENU;
+                primeraVez = true;
+                Serial.println("Returning to Menu from Snake");
+            }
+            digitalWrite(2, HIGH);
+            // snake_init();
+            snake_game();
+
             break;
         case STATE_PONG:
+            if (MenuBack())
+            {
+                currentState = STATE_MENU;
+                primeraVez = true;
+            }
+            pong::game_pong();
+            digitalWrite(2, HIGH);
             // Actualiza o inicia Pong
             break;
         case STATE_TETRIS:
+            digitalWrite(2, HIGH);
+            primeraVez = true;
             // Actualiza o inicia Tetris
             break;
         case STATE_CONFIG:
+            digitalWrite(2, HIGH);
+            primeraVez = true;
             // Actualiza o muestra la pantalla de configuración
             break;
         default:

@@ -58,4 +58,11 @@ void InitButtons()
     pinMode(BTN_DOWN, INPUT_PULLUP);
     pinMode(BTN_LEFT, INPUT_PULLUP);
     pinMode(BTN_RIGHT, INPUT_PULLUP);
+    // Diagnostic output: list pins and their current digitalRead value
+    Serial.print("InitButtons pins: OK="); Serial.print(BTN_OK); Serial.print(" val="); Serial.print(digitalRead(BTN_OK));
+    Serial.print(" BACK="); Serial.print(BTN_BACK); Serial.print(" val="); Serial.print(digitalRead(BTN_BACK));
+    Serial.print(" UP="); Serial.print(BTN_UP); Serial.print(" val="); Serial.print(digitalRead(BTN_UP));
+    Serial.print(" DOWN="); Serial.print(BTN_DOWN); Serial.print(" val="); Serial.print(digitalRead(BTN_DOWN));
+    Serial.print(" LEFT="); Serial.print(BTN_LEFT); Serial.print(" val="); Serial.print(digitalRead(BTN_LEFT));
+    Serial.print(" RIGHT="); Serial.print(BTN_RIGHT); Serial.print(" val="); Serial.println(digitalRead(BTN_RIGHT));
 }
