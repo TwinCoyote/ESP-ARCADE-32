@@ -5,6 +5,7 @@
 #include "../drivers/input/buttons.h"
 #include "../games/snake/Snake.h"
 #include "../games/pong/pong.h"
+#include "../games/pruebas/pruebas.h"
 
 bool primeraVez = true;
 
@@ -66,6 +67,11 @@ void SystemManager::update()
                 currentState = STATE_CONFIG;
                 Serial.println("Switching to Config");
                 break;
+            case 4:
+                currentState = STATE_BIRD;
+                Serial.print("Switching to Flappy Bird");
+                break;
+
             default:
                 break;
             }
@@ -81,33 +87,49 @@ void SystemManager::update()
             {
                 currentState = STATE_MENU;
                 primeraVez = true;
-                Serial.println("Returning to Menu from Snake");
             }
             digitalWrite(2, HIGH);
-            // snake_init();
             snake_game();
-
             break;
+
         case STATE_PONG:
             if (MenuBack())
             {
                 currentState = STATE_MENU;
                 primeraVez = true;
             }
+            digitalWrite(2, HIGH);
             pong::game_pong();
-            digitalWrite(2, HIGH);
-            // Actualiza o inicia Pong
             break;
+
         case STATE_TETRIS:
+            if (MenuBack())
+            {
+                currentState = STATE_MENU;
+                primeraVez = true;
+            }
             digitalWrite(2, HIGH);
-            primeraVez = true;
-            // Actualiza o inicia Tetris
             break;
+
         case STATE_CONFIG:
+            if (MenuBack())
+            {
+                currentState = STATE_MENU;
+                primeraVez = true;
+            }
             digitalWrite(2, HIGH);
-            primeraVez = true;
-            // Actualiza o muestra la pantalla de configuración
             break;
+
+        case STATE_BIRD:
+            if (MenuBack())
+            {
+                currentState = STATE_MENU;
+                primeraVez = true;
+            }
+            digitalWrite(2, HIGH);
+            flappy_bird();
+            break;
+
         default:
             break;
         }

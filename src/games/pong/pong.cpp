@@ -12,11 +12,11 @@ namespace pong
     void move_ball();
 
     int pong_direccion = 1;
-    const int botonArriba = 2;
-    const int botonAbajo = 19;
-    const int botonDerecha = 4;
-    const int botonIzquierda = 16;
-    const int botonSelect = 5;
+    // const int botonArriba = 2;
+    // const int botonAbajo = 19;
+    // const int botonDerecha = 4;
+    // const int botonIzquierda = 16;
+    // const int botonSelect = 5;
 
     const int pong_len_block = 4;
     const int len_block = 4;
@@ -227,11 +227,11 @@ namespace pong
         ball_init();
     }
 
-    // void end_game(){
-    //     if(count_user >= 10){
+    void end_game(){
+        if(count_user >= 10){
             
-    //     }
-    // }
+        }
+    }
 
     void game_pong()
     {

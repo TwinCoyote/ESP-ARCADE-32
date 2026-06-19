@@ -10,6 +10,7 @@ public:
         STATE_PONG,
         STATE_TETRIS,
         STATE_CONFIG,
+        STATE_BIRD,
     };
 
     void begin();
