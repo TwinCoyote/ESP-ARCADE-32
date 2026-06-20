@@ -124,13 +124,6 @@ bool MenuBack()
         return true;
     }
 
-    // Reset the latched state when the button is released so subsequent
-    // presses can be detected (matches MenuConfirm behavior).
-    if (!current)
-    {
-        lastOkState = false;
-    }
-
     return false;
 }
 

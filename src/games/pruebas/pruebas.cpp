@@ -66,18 +66,22 @@ Pipe::Pipe(int x)
 //     x_pipe -= 2;
 // }
 
+
 void Pipe::move()
 {
-    x_pipe -= 2;
+    x_pipe -= 2; 
 
-    if (x_pipe < -(int)len_pipe)
+    
+    if (x_pipe < -(int)len_pipe) 
     {
-        x_pipe = ANCHO_PANTALLA;
-
+        x_pipe = ANCHO_PANTALLA; 
+        
+        
         high_superior = random(8, 40);
         high_inferior = 64 - high_superior - pipe_hole;
     }
 }
+
 
 void Pipe::render()
 {
