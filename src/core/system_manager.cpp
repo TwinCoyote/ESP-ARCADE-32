@@ -6,6 +6,7 @@
 #include "../games/snake/Snake.h"
 #include "../games/pong/pong.h"
 #include "../games/pruebas/pruebas.h"
+#include "../ui/config/config_menu.h"
 
 bool primeraVez = true;
 
@@ -83,6 +84,7 @@ void SystemManager::update()
         switch (currentState)
         {
         case STATE_SNAKE:
+        {
             if (MenuBack())
             {
                 currentState = STATE_MENU;
@@ -91,8 +93,10 @@ void SystemManager::update()
             digitalWrite(2, HIGH);
             snake_game();
             break;
+        }
 
         case STATE_PONG:
+        {
             if (MenuBack())
             {
                 currentState = STATE_MENU;
@@ -101,8 +105,10 @@ void SystemManager::update()
             digitalWrite(2, HIGH);
             pong::game_pong();
             break;
+        }
 
         case STATE_TETRIS:
+        {
             if (MenuBack())
             {
                 currentState = STATE_MENU;
@@ -110,17 +116,24 @@ void SystemManager::update()
             }
             digitalWrite(2, HIGH);
             break;
+        }
 
         case STATE_CONFIG:
+        {
             if (MenuBack())
             {
                 currentState = STATE_MENU;
                 primeraVez = true;
             }
             digitalWrite(2, HIGH);
+            int dires = input.realDirection();
+            configMenu.handleInput(dires);
+            configMenu.render();
             break;
+        }
 
         case STATE_BIRD:
+        {
             if (MenuBack())
             {
                 currentState = STATE_MENU;
@@ -129,6 +142,7 @@ void SystemManager::update()
             digitalWrite(2, HIGH);
             flappy_bird();
             break;
+        }
 
         default:
             break;
