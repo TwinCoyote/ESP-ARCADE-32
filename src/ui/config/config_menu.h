@@ -3,23 +3,19 @@
 
 #include <Arduino.h>
 
-class MenuConfig
+class MenuS
 {
 private:
-    const char *options[3] = {
-        "Wifi",
-        "Display",
-        "Info"};
-
+    const char **options;
     unsigned int cursor;
-    unsigned int menuLen = 3;
+    unsigned int menuLen;
 
 public:
-    MenuConfig();
+    MenuS(const char *opt[], unsigned int len);
 
     void handleInput(int dir);
     void render();
+    unsigned int getIndex() const;
 };
 
-extern MenuConfig configMenu;
 #endif // CONFIG_MENU_H

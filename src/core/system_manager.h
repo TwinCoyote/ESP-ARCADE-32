@@ -11,6 +11,7 @@ public:
         STATE_TETRIS,
         STATE_CONFIG,
         STATE_BIRD,
+        STATE_WIFI_CONFIG,
     };
 
     void begin();

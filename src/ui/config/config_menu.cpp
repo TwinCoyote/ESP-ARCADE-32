@@ -3,18 +3,18 @@
 #include "../../drivers/display/display.h"
 #include "../../drivers/time/millis.h"
 
-MenuConfig configMenu;
-
-MenuConfig::MenuConfig()
+MenuS::MenuS(const char *opt[], unsigned int len)
 {
     cursor = 0;
+    options = opt;
+    menuLen = len;
 }
 
-void MenuConfig::handleInput(int dir)
+void MenuS::handleInput(int dir)
 {
     if (dir == 1)
     {
-        if (cursor == 2)
+        if (cursor == menuLen - 1)
         {
             cursor = 0;
         }
@@ -27,7 +27,7 @@ void MenuConfig::handleInput(int dir)
     {
         if (cursor == 0)
         {
-            cursor = 2;
+            cursor = menuLen - 1;
         }
         else
         {
@@ -36,7 +36,7 @@ void MenuConfig::handleInput(int dir)
     }
 }
 
-void MenuConfig::render()
+void MenuS::render()
 {
     ClearDisplay();
     SetMenuFont();
@@ -56,4 +56,9 @@ void MenuConfig::render()
 
     ActDisplay();
     millis(50);
+}
+
+unsigned int MenuS::getIndex() const
+{
+    return cursor;
 }

@@ -8,20 +8,20 @@ ESPARCADE is a modular handheld gaming console based on **ESP32-S3**, designed w
 
 The firmware follows a layered architecture to separate:
 
-* Hardware abstraction
-* System services
-* Core engine logic
-* User interface
-* Games
+- Hardware abstraction
+- System services
+- Core engine logic
+- User interface
+- Games
 
 This allows:
 
-* Multiple display compatibility (OLED/TFT)
-* Modular game integration
-* OTA firmware updates
-* RTOS-based multitasking
-* Dual-core optimization
-* Easy scalability for future hardware revisions
+- Multiple display compatibility (OLED/TFT)
+- Modular game integration
+- OTA firmware updates
+- RTOS-based multitasking
+- Dual-core optimization
+- Easy scalability for future hardware revisions
 
 ---
 
@@ -85,76 +85,79 @@ ESPARCADE/
 │
 ├── include/
 │
+├── lib/
+│
 ├── src/
-│   │── main.cpp
+│   ├── main.cpp
+│   │
+│   ├── assets/
+│   │   └── images/
+│   │       ├── assets.cpp
+│   │       ├── assets.h
+│   │       ├── logo.h
+│   │       └── pong_images/
+│   │           ├── pong_lose.h
+│   │           ├── pong_win.h
+│   │           ├── scoreboard.cpp
+│   │           └── scoreboard.h
+│   │
+│   ├── config/
+│   │   ├── display_config.h
+│   │   └── pins.h
 │   │
 │   ├── core/
-│   │   ├── game_manager.cpp
-│   │   ├── game_manager.h
-│   │   │
-│   │   ├── scene_manager.cpp
-│   │   ├── scene_manager.h
-│   │   │
-│   │   ├── render_engine.cpp
-│   │   ├── render_engine.h
-│   │   │
-│   │   ├── input_manager.cpp
-│   │   └── input_manager.h
+│   │   ├── system_manager.cpp
+│   │   └── system_manager.h
+│   │
+│   ├── core0/
+│   │   └── services/
+│   │       ├── wifi_service.cpp
+│   │       └── wifi_service.h
 │   │
 │   ├── drivers/
 │   │   ├── display/
-│   │   │   ├── display_interface.h
-│   │   │   ├── ssd1306_display.cpp
-│   │   │   ├── sh1106_display.cpp
-│   │   │   └── tft_display.cpp
+│   │   │   ├── display.cpp
+│   │   │   └── display.h
 │   │   │
 │   │   ├── input/
 │   │   │   ├── buttons.cpp
 │   │   │   └── buttons.h
 │   │   │
-│   │   ├── audio/
-│   │   └── storage/
-│   │
-│   ├── services/
-│   │   ├── ota_service.cpp
-│   │   ├── save_service.cpp
-│   │   ├── wifi_service.cpp
-│   │   ├── battery_service.cpp
-│   │   └── filesystem_service.cpp
+│   │   └── time/
+│   │       ├── millis.cpp
+│   │       └── millis.h
 │   │
 │   ├── games/
-│   │   ├── game.h
-│   │   │
-│   │   ├── snake/
-│   │   │   ├── snake.cpp
-│   │   │   └── snake.h
-│   │   │
 │   │   ├── pong/
 │   │   │   ├── pong.cpp
 │   │   │   └── pong.h
 │   │   │
-│   │   └── tetris/
+│   │   ├── pruebas/
+│   │   │   ├── pruebas.cpp
+│   │   │   └── pruebas.h
+│   │   │
+│   │   └── snake/
+│   │       ├── Snake.cpp
+│   │       └── Snake.h
 │   │
-│   ├── ui/
-│   │   ├── menu.cpp
-│   │   ├── menu.h
-│   │   ├── animations.cpp
-│   │   └── icons.cpp
-│   │
-│   └── config/
-│       ├── pins.h
-│       ├── display_config.h
-│       ├── game_config.h
-│       └── system_config.h
+│   └── ui/
+│       ├── keyboard.cpp
+│       ├── keyboard.h
+│       ├── menu.cpp
+│       ├── menu.h
+│       │
+│       └── config/
+│           ├── config_menu.cpp
+│           └── config_menu.h
 │
 ├── test/
+│   ├── README
+│   └── test_menu.cpp
 │
-├── docs/
-│   ├── architecture.md
-│   ├── hardware.md
-│   └── roadmap.md
-│
-└── platformio.ini
+├── diagram.json
+├── platformio.ini
+├── README.md
+└── wokwi.toml
 ```
 
 ---
@@ -181,11 +184,11 @@ CORE 0
 
 Responsibilities:
 
-* OTA firmware updates
-* WiFi management
-* Background save operations
-* Battery monitoring
-* File system access
+- OTA firmware updates
+- WiFi management
+- Background save operations
+- Battery monitoring
+- File system access
 
 This prevents system services from blocking gameplay.
 
@@ -207,11 +210,11 @@ CORE 1
 
 Responsibilities:
 
-* Reading buttons
-* Running game logic
-* Display rendering
-* Audio playback
-* UI transitions
+- Reading buttons
+- Running game logic
+- Display rendering
+- Audio playback
+- UI transitions
 
 This ensures responsive gameplay and smooth rendering.
 
@@ -262,9 +265,9 @@ class Snake : public Game
 
 This allows:
 
-* Dynamic game switching
-* Scalable game development
-* Plug-and-play integration of future games
+- Dynamic game switching
+- Scalable game development
+- Plug-and-play integration of future games
 
 ---
 
@@ -284,9 +287,9 @@ public:
 
 Supported displays may include:
 
-* SSD1306 OLED
-* SH1106 OLED
-* SPI TFT Displays
+- SSD1306 OLED
+- SH1106 OLED
+- SPI TFT Displays
 
 Games do not interact with hardware directly.
 
@@ -304,15 +307,15 @@ This makes the firmware hardware-independent.
 
 ESPARCADE is designed around:
 
-* Modular firmware architecture
-* Scalability
-* Hardware abstraction
-* Maintainability
-* Professional embedded development practices
-* CI/CD integration
-* OTA firmware updates
-* RTOS multitasking
-* Cross-display compatibility
+- Modular firmware architecture
+- Scalability
+- Hardware abstraction
+- Maintainability
+- Professional embedded development practices
+- CI/CD integration
+- OTA firmware updates
+- RTOS multitasking
+- Cross-display compatibility
 
 Goal:
 

@@ -7,8 +7,11 @@
 #include "../games/pong/pong.h"
 #include "../games/pruebas/pruebas.h"
 #include "../ui/config/config_menu.h"
+#include "../ui/config/WiFi/wifi_display.h"
 
 bool primeraVez = true;
+static WiFiService wifiService("", "");
+static WifiMenu wifiMenu;
 
 void SystemManager::begin()
 {
@@ -24,13 +27,16 @@ void SystemManager::begin()
     delay(500);
     MenuInit();
     pinMode(2, OUTPUT);
+
+    // Initialize WiFi service
+    wifiService.begin();
 }
 
 void SystemManager::update()
 {
     if (currentState == STATE_MENU)
     {
-        digitalWrite(2, LOW);
+        // digitalWrite(2, LOW);
         // Actualizamos la lógica y guardamos si el usuario movió el menú
         bool huboMovimiento = MenuUpdate();
 
@@ -90,7 +96,7 @@ void SystemManager::update()
                 currentState = STATE_MENU;
                 primeraVez = true;
             }
-            digitalWrite(2, HIGH);
+            // digitalWrite(2, HIGH);
             snake_game();
             break;
         }
@@ -102,7 +108,7 @@ void SystemManager::update()
                 currentState = STATE_MENU;
                 primeraVez = true;
             }
-            digitalWrite(2, HIGH);
+            // digitalWrite(2, HIGH);
             pong::game_pong();
             break;
         }
@@ -114,7 +120,7 @@ void SystemManager::update()
                 currentState = STATE_MENU;
                 primeraVez = true;
             }
-            digitalWrite(2, HIGH);
+            // digitalWrite(2, HIGH);
             break;
         }
 
@@ -125,10 +131,36 @@ void SystemManager::update()
                 currentState = STATE_MENU;
                 primeraVez = true;
             }
-            digitalWrite(2, HIGH);
+            static const char *opcionesConfig[] = {"Wifi", "Display", "Info"};
+            static const unsigned int totalOpciones = sizeof(opcionesConfig) / sizeof(opcionesConfig[0]);
+            static MenuS menuConfig(opcionesConfig, totalOpciones);
+
             int dires = input.realDirection();
-            configMenu.handleInput(dires);
-            configMenu.render();
+            menuConfig.handleInput(dires);
+            menuConfig.render();
+
+            if (MenuConfirm())
+            {
+                unsigned int sel = menuConfig.getIndex();
+                switch (sel)
+                {
+                case 0:
+                    Serial.println("Config -> Wifi selected");
+                    currentState = STATE_WIFI_CONFIG;
+                    wifiMenu.init(&wifiService);
+                    break;
+                case 1:
+                    Serial.println("Config -> Display selected");
+                    // Llama a la rutina de configuración de pantalla aquí
+                    break;
+                case 2:
+                    Serial.println("Config -> Info selected");
+                    // Mostrar información del sistema aquí
+                    break;
+                default:
+                    break;
+                }
+            }
             break;
         }
 
@@ -139,8 +171,20 @@ void SystemManager::update()
                 currentState = STATE_MENU;
                 primeraVez = true;
             }
-            digitalWrite(2, HIGH);
+            // digitalWrite(2, HIGH);
             flappy_bird();
+            break;
+        }
+
+        case STATE_WIFI_CONFIG:
+        {
+            if (MenuBack())
+            {
+                currentState = STATE_CONFIG;
+                wifiMenu.reset();
+            }
+            wifiMenu.update();
+            wifiMenu.render();
             break;
         }
 
