@@ -6,8 +6,12 @@ VirtualKeyboard::VirtualKeyboard(int x, int y)
 {
     this->x = x;
     this->y = y;
-    row = 0;
-    column = 0;
+    mode = 0; // start on lowercase mode
+    row = 2;
+    column = 6; // start on '/' key for mode toggle
+    current_text = "";
+    EntireWord = "";
+    submitPressed = false;
 }
 
 /**
@@ -62,7 +66,14 @@ void VirtualKeyboard::handleInput(int dir)
     }
     if (dir == 5)
     {
-        char keycap = keyboard[row][column];
+        if (row == 2 && column == 6)
+        {
+            mode = (mode + 1) % 3;
+            return;
+        }
+
+        const char (*activeKeyboard)[10] = mode == 1 ? keyboard_Upper : (mode == 2 ? keyboard_Numbers : keyboard);
+        char keycap = activeKeyboard[row][column];
         if (keycap == '<')
         {
             if (current_text.length() > 0)
@@ -74,32 +85,11 @@ void VirtualKeyboard::handleInput(int dir)
         {
             submitPressed = true;
         }
-        else if (keycap == '/')
-        {
-            uppercase = !uppercase;
-        }
         else
         {
             if (current_text.length() < 16)
             {
-                if (uppercase)
-                {
-                    char upper = keycap;
-                    if (upper >= 'a' && upper <= 'z')
-                    {
-                        upper = upper - 'a' + 'A';
-                    }
-                    current_text += upper;
-                }
-                else
-                {
-                    char lower = keycap;
-                    if (lower >= 'A' && lower <= 'Z')
-                    {
-                        lower = lower - 'A' + 'a';
-                    }
-                    current_text += lower;
-                }
+                current_text += keycap;
             }
         }
     }
@@ -132,11 +122,12 @@ void VirtualKeyboard::render()
     const int vSpacing = 14;
     const int labelY = y - 5; // 12
 
-    ClearDisplay();
     SetMenuFont();
-    // DrawText(x, labelY, "TECLADO");
 
     const int boxTopOffset = 12; // 2 10
+    const char (*activeKeyboard)[10] = mode == 1 ? keyboard_Upper : (mode == 2 ? keyboard_Numbers : keyboard);
+    // const char *modeLabel = mode == 2 ? "PSW: 1" : (mode == 1 ? "PSW: A" : "PSW: a");
+
     for (unsigned int r = 0; r < 3; r++)
     {
         for (unsigned int c = 0; c < 10; c++)
@@ -149,15 +140,11 @@ void VirtualKeyboard::render()
                 DrawBox(cellX - 2, cellY - 18, cellWidth + 2, cellHeight + 2);
             }
 
-            char letter[2] = {keyboard[r][c], '\0'};
+            char letter[2] = {activeKeyboard[r][c], '\0'};
             DrawText(cellX, cellY - 8, letter);
         }
     }
 
-    int textY = y - 5;
-    DrawText(x, textY - 3, uppercase ? "PSW: A" : "PSW: a");
-    DrawText(x + 32, textY - 3, current_text.c_str());
-
-    DrawText(x, y + 3 * vSpacing + 10, "Pass:");
-    ActDisplay();
+    // DrawText(x, y - 5, modeLabel);
+    // DrawText(x, y - 5, modeLabel);
 }

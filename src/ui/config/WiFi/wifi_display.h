@@ -13,7 +13,8 @@ enum WifiMenuState
     WIFI_STATE_SCANNING,
     WIFI_STATE_SELECT_NETWORK,
     WIFI_STATE_ENTER_PASSWORD,
-    WIFI_STATE_CONNECTING
+    WIFI_STATE_CONNECTING,
+    WIFI_STATE_CONNECTION_FAILED
 };
 
 class WifiMenu
@@ -27,12 +28,15 @@ private:
     VirtualKeyboard *keyboardPtr;
     WiFiService *wifiServicePtr;
     unsigned long lastScanTime;
-    const unsigned long SCAN_INTERVAL = 10000; // Rescan every 10 seconds
+    unsigned long connectStartTime;
+    const unsigned long SCAN_INTERVAL = 10000;   // Rescan every 10 seconds
+    const unsigned long CONNECT_TIMEOUT = 10000; // Connection timeout in ms
 
     void scanNetworks();
     void renderNetworkList();
     void renderPasswordEntry();
     void renderConnecting();
+    void renderConnectionFailed();
     void handleNetworkSelection();
     void handlePasswordEntry();
 
