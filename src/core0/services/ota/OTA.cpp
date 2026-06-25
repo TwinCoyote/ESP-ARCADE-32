@@ -63,6 +63,7 @@ bool OTAService::performUpdate()
     Serial.println(downloadUrl);
     WiFiClientSecure client;
     client.setInsecure();
+    httpUpdate.setFollowRedirects(HTTPC_FORCE_FOLLOW_REDIRECTS);
     Serial.println("¡Descargando nueva versión... No apagues la consola!");
     t_httpUpdate_return ret = httpUpdate.update(client, downloadUrl);
 
