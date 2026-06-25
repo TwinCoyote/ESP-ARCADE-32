@@ -6,9 +6,9 @@ elf = '.pio/build/esp32dev/firmware.elf'
 [[scenarios]]
 name = "Menu Games Navigation"
 actions = [
-    [1500, "low", "13"],
-    [1700, "high", "13"],
-    [2000 "low", "4"],
-    [2200, "high", "4"],
-    [2500, "screenshot", "menu_games_navigation.png"]
+    [4000, "low", "13"],
+    [4200, "high", "13"],
+    [4500 "low", "4"],
+    [4700, "high", "4"],
+    [6000, "screenshot", "menu_games_navigation.png"]
 ]
