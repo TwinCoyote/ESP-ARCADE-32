@@ -10,5 +10,6 @@ actions = [
     ["4200", "high", "13"],
     ["4500", "low", "4"],
     ["4700", "high", "4"],
-    ["6000", "screenshot", "menu_games_navigation.png"]
+    ["6000", "screenshot", "menu_games_navigation.png"],
+    ["6500", "quit"]
 ]
