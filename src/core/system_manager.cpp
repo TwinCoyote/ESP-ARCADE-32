@@ -131,7 +131,7 @@ void SystemManager::update()
                 currentState = STATE_MENU;
                 primeraVez = true;
             }
-            static const char *opcionesConfig[] = {"Wifi", "Display", "Info"};
+            static const char *opcionesConfig[] = {"Wifi", "Update", "Info"};
             static const unsigned int totalOpciones = sizeof(opcionesConfig) / sizeof(opcionesConfig[0]);
             static MenuS menuConfig(opcionesConfig, totalOpciones);
 
@@ -150,8 +150,9 @@ void SystemManager::update()
                     wifiMenu.init(&wifiService);
                     break;
                 case 1:
-                    Serial.println("Config -> Display selected");
+                    Serial.println("Config -> Update selected");
                     // Llama a la rutina de configuración de pantalla aquí
+                    // TODO: make the display for update firmware and the functions
                     break;
                 case 2:
                     Serial.println("Config -> Info selected");

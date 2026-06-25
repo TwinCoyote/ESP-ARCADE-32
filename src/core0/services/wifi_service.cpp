@@ -1,23 +1,87 @@
 #include "../services./wifi_service.h"
 #include <WiFi.h>
 
-WiFiService::WiFiService(const char *ssid, const char *password)
+WiFiService::WiFiService(const char *ssid, const char *password) : _ota("v1.0.5", "TwinCoyote", "ESP-ARCADE-32")
 {
     _ssid = ssid;
     _password = password;
     _isConnected = false;
+    _otaChecked = false;
 }
 
 void WiFiService::begin()
 {
     printMacAddress();
-    // Don't start the network task immediately; wait for explicit connect() call
+
+    bool hasCredentials = false;
+
+    if (_prefs.begin("wifi_creds", false))
+    {
+        String savedSSID = _prefs.getString("ssid", "");
+        String savedPASS = _prefs.getString("pass", "");
+
+        if (savedSSID != "")
+        {
+            _ssid = savedSSID;
+            _password = savedPASS;
+            hasCredentials = true;
+            Serial.print("Loaded saved WiFi SSID: ");
+            Serial.println(_ssid);
+        }
+        else
+        {
+            for (int slot = 0; slot < 4 && !hasCredentials; slot++)
+            {
+                String keySSID = "ssid_" + String(slot);
+                String keyPASS = "pass_" + String(slot);
+                String NetWorkSaved = _prefs.getString(keySSID.c_str(), "");
+                String PASSSaved = _prefs.getString(keyPASS.c_str(), "");
+
+                if (NetWorkSaved != "")
+                {
+                    _ssid = NetWorkSaved;
+                    _password = PASSSaved;
+                    hasCredentials = true;
+                    Serial.print("Loaded legacy WiFi SSID: ");
+                    Serial.println(_ssid);
+                }
+            }
+
+            if (!hasCredentials)
+            {
+                Serial.println("No stored WiFi credentials found.");
+            }
+        }
+        _prefs.end();
+    }
+    else
+    {
+        Serial.println("Unable to open WiFi credentials storage; skipping auto-connect.");
+    }
+
+    if (hasCredentials)
+    {
+        xTaskCreatePinnedToCore(
+            networkTaskProvider,
+            "WiFi-Task",
+            10240,
+            this,
+            1,
+            &_networkTaskHandle,
+            0);
+    }
 }
 
 void WiFiService::connect(const char *ssid, const char *password)
 {
     _ssid = ssid;
     _password = password;
+
+    if (_ssid.length() == 0)
+    {
+        Serial.println("No SSID provided; skipping WiFi connect.");
+        return;
+    }
 
     // Stop existing task if running
     if (_networkTaskHandle != NULL)
@@ -30,7 +94,7 @@ void WiFiService::connect(const char *ssid, const char *password)
     xTaskCreatePinnedToCore(
         networkTaskProvider,
         "WiFi-Task",
-        4096,
+        10240,
         this,
         1,
         &_networkTaskHandle,
@@ -147,7 +211,23 @@ void WiFiService::update()
 void WiFiService::networkLoop()
 {
     WiFi.mode(WIFI_STA);
-    WiFi.begin(_ssid, _password);
+    // WiFi.begin(_ssid, _password);
+    WiFi.begin(_ssid.c_str(), _password.c_str());
+
+    while (true)
+    {
+        update();
+
+        if (_isConnected && !_otaChecked)
+        {
+            Serial.println("[Core 0] ¡Wi-Fi Listo! Buscando actualizaciones de fondo...");
+
+            _otaChecked = true;
+            _ota.performUpdate();
+            Serial.println("[Core 0] Consola al día. Volviendo a tareas de red cotidianas.");
+        }
+        vTaskDelay(pdMS_TO_TICKS(100));
+    }
 
     int attempts = 0;
     const int MAX_ATTEMPTS = 20; // ~10 seconds
@@ -177,4 +257,20 @@ void WiFiService::networkTaskProvider(void *pvParameters)
 {
     WiFiService *serviceInstance = (WiFiService *)pvParameters;
     serviceInstance->networkLoop();
+}
+
+void WiFiService::connectToNewNetwork(const char *ssid, const char *password)
+{
+    _ssid = ssid;
+    _password = password;
+
+    _prefs.begin("wifi_creds", false);
+
+    _prefs.putString("ssid", _ssid);
+    _prefs.putString("pass", _password);
+
+    _prefs.end();
+    Serial.println("Nuevas credenciales guardadas con éxito en la Flash.");
+    WiFi.disconnect();
+    WiFi.begin(_ssid, _password);
 }

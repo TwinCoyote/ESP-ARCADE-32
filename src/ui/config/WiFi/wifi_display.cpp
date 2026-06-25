@@ -246,7 +246,7 @@ void WifiMenu::handlePasswordEntry()
                 Serial.println("Attempting to connect...");
                 if (wifiServicePtr != nullptr)
                 {
-                    wifiServicePtr->connect(selectedSSID.c_str(), enteredPassword.c_str());
+                    wifiServicePtr->connectToNewNetwork(selectedSSID.c_str(), enteredPassword.c_str());
                 }
             }
         }
