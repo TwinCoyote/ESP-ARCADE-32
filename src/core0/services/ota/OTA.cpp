@@ -60,12 +60,17 @@ bool OTAService::performUpdate()
         return false;
     }
     String downloadUrl = "https://github.com/" + _user + "/" + _repo + "/releases/download/" + latestVersion + "/firmware.bin";
+    Serial.println(latestVersion);
     Serial.println(downloadUrl);
+
     WiFiClientSecure client;
     client.setInsecure();
-    httpUpdate.setFollowRedirects(HTTPC_FORCE_FOLLOW_REDIRECTS);
+    HTTPClient http;
+    http.setFollowRedirects(HTTPC_FORCE_FOLLOW_REDIRECTS);
+    http.begin(client, downloadUrl);
+
     Serial.println("¡Descargando nueva versión... No apagues la consola!");
-    t_httpUpdate_return ret = httpUpdate.update(client, downloadUrl);
+    t_httpUpdate_return ret = httpUpdate.update(http, _version);
 
     switch (ret)
     {
