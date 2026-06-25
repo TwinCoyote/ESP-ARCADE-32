@@ -45,7 +45,13 @@ jobs:
         run: |
           wokwi-cli --timeout 5000 --timeout-exit-code 0
         env:
-          WOKWI_CLI_TOKEN: ${{ secrets.WOKWI_CLI_TOKEN }}
+          WOKWI_CLI_TOKEN: ${{ secrets.WOKWI_CLI_TOKEN }}\
+
+      - name: Descargar Screenshot del Simulador
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshot-pantalla
+          path: menu_arcade.png
 
       - name: Crear Release y subir Binario
         if: startsWith(github.ref, 'refs/tags/v')

@@ -2,3 +2,17 @@
 version = 1
 firmware = '.pio/build/esp32dev/firmware.bin'
 elf = '.pio/build/esp32dev/firmware.elf'
+
+[[scenarios]]
+name = "Menu Games Navigation"
+actions = [
+    [1500, "low",13],
+    [1700, "high",13],
+    [2000, "low",4],
+    [2200, "high",4],
+
+    [2500,"screenshot","menu_games_navigation.png"]
+
+
+
+]
