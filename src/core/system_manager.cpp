@@ -16,6 +16,35 @@ static WifiMenu wifiMenu;
 void SystemManager::begin()
 {
     Serial.begin(115200);
+    //
+    // delay(500);
+
+    // Serial.println("--- INFORMACIÓN DEL SILICIO ---");
+
+    // Serial.print("Modelo de ESP32: ");
+    // Serial.println(ESP.getChipModel());
+
+    // Serial.print("Núcleos de CPU: ");
+    // Serial.println(ESP.getChipCores());
+
+    // Serial.print("Tamaño de Flash: ");
+    // Serial.print(ESP.getFlashChipSize() / (1024 * 1024));
+    // Serial.println(" MB");
+
+    // Serial.print("¿Tiene PSRAM?: ");
+    // if (psramInit())
+    // {
+    //     Serial.print("SÍ, tamaño: ");
+    //     Serial.print(ESP.getPsramSize() / 1024);
+    //     Serial.println(" KB");
+    // }
+    // else
+    // {
+    //     Serial.println("NO (Solo los 520KB de SRAM interna)");
+    // }
+    // Serial.println("--------------------------------");
+
+    // //
     input.begin();
     InitDisplay();
     ClearDisplay();
@@ -28,7 +57,6 @@ void SystemManager::begin()
     MenuInit();
     pinMode(2, OUTPUT);
 
-    // Initialize WiFi service
     wifiService.begin();
 }
 
@@ -86,7 +114,7 @@ void SystemManager::update()
     }
     else
     {
-        // Aquí se ejecuta la lógica del estado activo (juego o configuración)
+   
         switch (currentState)
         {
         case STATE_SNAKE:
@@ -151,12 +179,12 @@ void SystemManager::update()
                     break;
                 case 1:
                     Serial.println("Config -> Update selected");
-                    // Llama a la rutina de configuración de pantalla aquí
+                    
                     // TODO: make the display for update firmware and the functions
                     break;
                 case 2:
                     Serial.println("Config -> Info selected");
-                    // Mostrar información del sistema aquí
+                    
                     break;
                 default:
                     break;

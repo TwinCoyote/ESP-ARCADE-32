@@ -43,7 +43,7 @@ jobs:
 
       - name: Ejecutar simulación en Wokwi
         run: |
-          wokwi-cli . --timeout 35000 --timeout-exit-code 0 \
+          wokwi-cli . --timeout 8000 --timeout-exit-code 0 \
             --screenshot-part oled1 \
             --screenshot-time 6000 \
             --screenshot-file menu_games_navigation.png
