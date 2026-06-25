@@ -51,7 +51,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: screenshot-pantalla
-          path: menu_arcade.png
+          path: menu_games_navigation.png
 
       - name: Crear Release y subir Binario
         if: startsWith(github.ref, 'refs/tags/v')
