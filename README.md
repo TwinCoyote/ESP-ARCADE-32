@@ -111,6 +111,9 @@ ESPARCADE/
 │   │
 │   ├── core0/
 │   │   └── services/
+│   │       ├── ota/
+│   │       │   ├── OTA.cpp
+│   │       │   └── OTA.h
 │   │       ├── wifi_service.cpp
 │   │       └── wifi_service.h
 │   │
@@ -159,6 +162,16 @@ ESPARCADE/
 ├── README.md
 └── wokwi.toml
 ```
+
+---
+
+# New Features
+
+- Added OTA update support in `src/core0/services/ota/`.
+- Added `ArduinoJson` dependency for GitHub JSON parsing.
+- OTA now fetches the latest release tag from GitHub and constructs a secure download URL.
+- Core 0 runs background WiFi and OTA tasks without blocking gameplay.
+- Serial debug output added for OTA version checks, HTTP errors, and update flow.
 
 ---
 
