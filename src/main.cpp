@@ -11,4 +11,5 @@ void setup()
 void loop()
 {
   systemManager.update();
+  delay(16);
 }

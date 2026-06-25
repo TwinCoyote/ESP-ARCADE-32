@@ -209,11 +209,75 @@ void WiFiService::update()
     }
 }
 
+// void WiFiService::networkLoop()
+// {
+//     WiFi.mode(WIFI_STA);
+//     // WiFi.begin(_ssid, _password);
+//     WiFi.begin(_ssid.c_str(), _password.c_str());
+
+//     while (true)
+//     {
+//         update();
+
+//         if (_isConnected && !_otaChecked)
+//         {
+//             Serial.println("[Core 0] ¡Wi-Fi Listo! Buscando actualizaciones de fondo...");
+
+//             _otaChecked = true;
+//             _ota.performUpdate();
+//             Serial.println("[Core 0] Consola al día. Volviendo a tareas de red cotidianas.");
+//         }
+//         vTaskDelay(pdMS_TO_TICKS(100));
+//     }
+
+//     int attempts = 0;
+//     const int MAX_ATTEMPTS = 20; // ~10 seconds
+
+//     while (attempts < MAX_ATTEMPTS)
+//     {
+//         update();
+//         if (isConnected())
+//         {
+//             Serial.println("WiFi connected!");
+//             break;
+//         }
+//         vTaskDelay(pdMS_TO_TICKS(500));
+//         attempts++;
+//     }
+
+//     if (!isConnected())
+//     {
+//         Serial.println("WiFi connection failed");
+//         WiFi.disconnect();
+//     }
+
+//     vTaskDelay(pdMS_TO_TICKS(portMAX_DELAY)); // Keep task running but idle
+// }
+
 void WiFiService::networkLoop()
 {
     WiFi.mode(WIFI_STA);
-    // WiFi.begin(_ssid, _password);
     WiFi.begin(_ssid.c_str(), _password.c_str());
+
+    int attempts = 0;
+    const int MAX_ATTEMPTS = 20;
+
+    while (attempts < MAX_ATTEMPTS && !isConnected())
+    {
+        vTaskDelay(pdMS_TO_TICKS(500));
+        attempts++;
+    }
+
+    if (isConnected())
+    {
+        Serial.println("\n[Core 0] WiFi connected!");
+    }
+    else
+    {
+        Serial.println("\n[Core 0] WiFi connection failed. Apagando antena.");
+        WiFi.disconnect();
+        vTaskDelete(NULL);
+    }
 
     while (true)
     {
@@ -222,36 +286,13 @@ void WiFiService::networkLoop()
         if (_isConnected && !_otaChecked)
         {
             Serial.println("[Core 0] ¡Wi-Fi Listo! Buscando actualizaciones de fondo...");
-
             _otaChecked = true;
             _ota.performUpdate();
             Serial.println("[Core 0] Consola al día. Volviendo a tareas de red cotidianas.");
         }
-        vTaskDelay(pdMS_TO_TICKS(100));
+
+        vTaskDelay(pdMS_TO_TICKS(1000));
     }
-
-    int attempts = 0;
-    const int MAX_ATTEMPTS = 20; // ~10 seconds
-
-    while (attempts < MAX_ATTEMPTS)
-    {
-        update();
-        if (isConnected())
-        {
-            Serial.println("WiFi connected!");
-            break;
-        }
-        vTaskDelay(pdMS_TO_TICKS(500));
-        attempts++;
-    }
-
-    if (!isConnected())
-    {
-        Serial.println("WiFi connection failed");
-        WiFi.disconnect();
-    }
-
-    vTaskDelay(pdMS_TO_TICKS(portMAX_DELAY)); // Keep task running but idle
 }
 
 void WiFiService::networkTaskProvider(void *pvParameters)
