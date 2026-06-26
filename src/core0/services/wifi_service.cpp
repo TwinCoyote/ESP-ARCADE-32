@@ -3,9 +3,9 @@
 #include <WiFi.h>
 #include "ota/OTA.h"
 
-static const char *OTA_CURRENT_VERSION = "v1.0.5"; // TODO: Hacer que el valor lo tome de la variable en la nvs.
+// static const char *OTA_CURRENT_VERSION = "v1.0.5"; // TODO: Hacer que el valor lo tome de la variable en la nvs.
 
-WiFiService::WiFiService(const char *ssid, const char *password) : _ota(OTA_CURRENT_VERSION, "TwinCoyote", "ESP-ARCADE-32")
+WiFiService::WiFiService(const char *ssid, const char *password) : _ota(OTAService::readVersion().c_str(), "TwinCoyote", "ESP-ARCADE-32")
 {
     _ssid = ssid;
     _password = password;

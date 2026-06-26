@@ -191,14 +191,7 @@ void SystemManager::update()
                     }
                     Serial.println("Config -> Update selected");
                     currentState = STATE_UPDATE_CONFIG;
-                    // static UpdateMenu menuUpdate;
-                    // menuUpdate.printUpdateMenu();
-                    // ClearDisplay();
-                    // DrawText(50, 30, "Update...");
-                    // ActDisplay();
-                    // wait(2000);
-                    // currentState = STATE_MENU;
-                    // primeraVez = true;
+
 
                     // TODO: make the display for update firmware and the functions
                     break;

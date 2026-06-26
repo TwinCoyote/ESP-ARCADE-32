@@ -31,6 +31,7 @@ public:
     static String readVersion();
     void setVersion(String version);
     Preferences prefs;
+    String extract_version();
 };
 
 #endif

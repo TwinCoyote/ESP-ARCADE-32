@@ -1,6 +1,7 @@
 #include "update.h"
-static const char *OTA_CURRENT_VERSION = "v1.0.5";
-UpdateMenu::UpdateMenu() : _ota(OTA_CURRENT_VERSION, "TwinCoyote", "ESP-ARCADE-32")
+
+// static const char *OTA_CURRENT_VERSION = "v1.0.5";
+UpdateMenu::UpdateMenu() : _ota(OTAService::readVersion().c_str(), "TwinCoyote", "ESP-ARCADE-32")
 {
     // _otaChecked = false;
     ;

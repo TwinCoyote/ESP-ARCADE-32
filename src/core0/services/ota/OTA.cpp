@@ -170,3 +170,8 @@ void OTAService::setVersion(String version)
 {
     _version = version;
 }
+
+String OTAService::extract_version()
+{
+    return _version;
+}
