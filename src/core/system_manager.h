@@ -12,6 +12,8 @@ public:
         STATE_CONFIG,
         STATE_BIRD,
         STATE_WIFI_CONFIG,
+        STATE_UPDATE_CONFIG,
+        STATE_INFO
     };
 
     void begin();

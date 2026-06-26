@@ -2,6 +2,7 @@
 #define CONFIG_MENU_H
 
 #include <Arduino.h>
+#include "../menu.h"
 
 class MenuS
 {

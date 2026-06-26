@@ -1,8 +1,11 @@
 // #include "../services./wifi_service.h"
 #include "wifi_service.h"
 #include <WiFi.h>
+#include "ota/OTA.h"
 
-WiFiService::WiFiService(const char *ssid, const char *password) : _ota("v1.0.5", "TwinCoyote", "ESP-ARCADE-32")
+static const char *OTA_CURRENT_VERSION = "v1.0.5"; // TODO: Hacer que el valor lo tome de la variable en la nvs.
+
+WiFiService::WiFiService(const char *ssid, const char *password) : _ota(OTA_CURRENT_VERSION, "TwinCoyote", "ESP-ARCADE-32")
 {
     _ssid = ssid;
     _password = password;
@@ -271,6 +274,11 @@ void WiFiService::networkLoop()
     if (isConnected())
     {
         Serial.println("\n[Core 0] WiFi connected!");
+        // Lee la versión guardada en NVS ahora que el sistema está listo
+        String savedVersion = OTAService::readVersion();
+        // Serial.print("NVS: savedVersion leida en networkLoop = ");
+        // Serial.println(savedVersion);
+        _ota.setVersion(savedVersion);
     }
     else
     {

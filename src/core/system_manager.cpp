@@ -8,6 +8,7 @@
 #include "../games/pruebas/pruebas.h"
 #include "../ui/config/config_menu.h"
 #include "../ui/config/WiFi/wifi_display.h"
+#include "../ui/config/update/update.h"
 
 bool primeraVez = true;
 static WiFiService wifiService("", "");
@@ -114,7 +115,7 @@ void SystemManager::update()
     }
     else
     {
-   
+
         switch (currentState)
         {
         case STATE_SNAKE:
@@ -173,18 +174,42 @@ void SystemManager::update()
                 switch (sel)
                 {
                 case 0:
+                    if (MenuBack())
+                    {
+                        currentState = STATE_MENU;
+                        primeraVez = true;
+                    }
                     Serial.println("Config -> Wifi selected");
                     currentState = STATE_WIFI_CONFIG;
                     wifiMenu.init(&wifiService);
                     break;
                 case 1:
+                    if (MenuBack())
+                    {
+                        currentState = STATE_MENU;
+                        primeraVez = true;
+                    }
                     Serial.println("Config -> Update selected");
-                    
+                    currentState = STATE_UPDATE_CONFIG;
+                    // static UpdateMenu menuUpdate;
+                    // menuUpdate.printUpdateMenu();
+                    // ClearDisplay();
+                    // DrawText(50, 30, "Update...");
+                    // ActDisplay();
+                    // wait(2000);
+                    // currentState = STATE_MENU;
+                    // primeraVez = true;
+
                     // TODO: make the display for update firmware and the functions
                     break;
                 case 2:
+                    if (MenuBack())
+                    {
+                        currentState = STATE_MENU;
+                        primeraVez = true;
+                    }
                     Serial.println("Config -> Info selected");
-                    
+
                     break;
                 default:
                     break;
@@ -214,6 +239,16 @@ void SystemManager::update()
             }
             wifiMenu.update();
             wifiMenu.render();
+            break;
+        }
+        case STATE_UPDATE_CONFIG:
+        {
+            if (MenuBack())
+            {
+                currentState = STATE_CONFIG;
+            }
+            static UpdateMenu menuUpdate;
+            menuUpdate.logicUpdateMenu();
             break;
         }
 
