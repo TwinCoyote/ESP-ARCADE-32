@@ -188,6 +188,66 @@ ESP-ARCADE/
 
 ---
 
+# Custom PCB (ESP-ARCADE Rev B)
+
+Besides the firmware, ESPARCADE has its own handheld board designed in **KiCad 10**: a 4-layer, 52 × 105 mm PCB (F.Cu / PWR / GND / B.Cu) built around an **ESP32-S3-WROOM-1** module, with the OLED and the controls on the front and the module and power electronics on the back.
+
+<p align="center">
+  <img src="docs/images/pcb-3d-overview.png" alt="ESP-ARCADE PCB 3D render, front (left) and back (right)" width="720">
+</p>
+
+<p align="center"><em>3D render — front side (OLED, D-pad, buttons) and back side (ESP32-S3, power, audio).</em></p>
+
+## Board Features
+
+| Block         | Part                          | Notes                                                        |
+| ------------- | ----------------------------- | ------------------------------------------------------------ |
+| MCU           | ESP32-S3-WROOM-1              | Wi-Fi + BLE, native USB, PCB antenna at the board edge       |
+| USB input     | USB-C receptacle + USBLC6-2SC6 | 5.1 kΩ CC pull-downs, ESD protection on D+/D-                |
+| Battery       | BQ24070 + JST-PH connector    | 1S LiPo charger with power-path (`SYS`), status/PG signals to the MCU |
+| 3V3 rail      | TPS631000 buck-boost + 1 µH   | Keeps 3V3 stable while the battery discharges                |
+| Audio         | MAX98357A (I²S class-D amp)   | 2-pin speaker header, `SD_MODE` controlled by the MCU        |
+| Display       | 1.3" 128×64 OLED (I²C)        | 4-pin header, 4.7 kΩ pull-ups                                |
+| Controls      | 6 tactile buttons + RESET / BOOT / POWER | D-pad, SELECT and BACK                            |
+| Battery gauge | 1 MΩ / 1 MΩ divider → ADC1    | `VBAT_SENSE` on GPIO2                                        |
+| Expansion     | I²C, GPIO (IO4–IO7) and UART headers | Test points on VBUS, SYS, BAT+, 3V3, GND, LX2         |
+
+<p align="center">
+  <img src="docs/images/pcb-top-3d.png" alt="PCB front side" width="340">
+  <img src="docs/images/pcb-bottom-3d.png" alt="PCB back side" width="340">
+</p>
+
+## Schematic
+
+<p align="center">
+  <img src="docs/images/pcb-schematic.png" alt="ESP-ARCADE schematic, ESP32-S3-WROOM-1 board Rev B" width="100%">
+</p>
+
+## PCB Pin Mapping (ESP32-S3)
+
+| Function       | GPIO | Function        | GPIO |
+| -------------- | ---- | --------------- | ---- |
+| BTN_UP         | 10   | OLED I²C SDA    | 8    |
+| BTN_DOWN       | 11   | OLED I²C SCL    | 9    |
+| BTN_LEFT       | 12   | I²S BCLK        | 38   |
+| BTN_RIGHT      | 13   | I²S LRCLK       | 39   |
+| BTN_SELECT (OK)| 14   | I²S DIN         | 40   |
+| BTN_BACK       | 15   | Amp SD_MODE     | 41   |
+| POWER button   | 21   | VBAT_SENSE (ADC)| 2    |
+| CHG_PG         | 16   | CHG_STAT1 / 2   | 1 / 18 |
+| USB D- / D+    | 19 / 20 | UART TX / RX | 43 / 44 |
+
+> ⚠️ The firmware in `src/config/` still uses the ESP32 DevKit / Wokwi pin map (see [Hardware Configuration](#hardware-configuration)). Porting it to the PCB pin map, plus audio and battery support, is on the roadmap.
+
+## Hardware Status
+
+- ✅ Schematic complete (KiCad ERC: 0 errors)
+- ✅ Component placement, board outline and 4-layer stackup
+- 🚧 Layout routing in progress — KiCad DRC reports no clearance/short errors, but not every net is routed yet
+- ⏳ Board not manufactured yet
+
+---
+
 # Build Targets
 
 Defined in `platformio.ini`:
