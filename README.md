@@ -1,440 +1,251 @@
 # ESP-ARCADE-32
 
-# ESPARCADE Firmware Architecture (ESP32 / ESP32-S3)
+Firmware modular para una consola portátil basada en ESP32, con pantalla OLED de 128 x 64, controles físicos, Wi-Fi y soporte para simulación en Wokwi.
 
-## Overview
+El proyecto está organizado por capas para que los juegos, la interfaz y los servicios del sistema puedan evolucionar sin quedar acoplados al hardware.
 
-ESPARCADE is a modular handheld gaming console firmware built on **ESP32** (compatible with ESP32-S3 and classic ESP32-DEVKIT-C), designed with scalability, maintainability, and portability in mind.
+## Estado del proyecto
 
-The firmware follows a layered architecture to separate:
+| Área                                     | Estado                       |
+| ---------------------------------------- | ---------------------------- |
+| Snake                                    | Implementado                 |
+| Pong                                     | Implementado                 |
+| Flappy Bird                              | Implementado                 |
+| Menú principal y navegación              | Implementado                 |
+| Configuración Wi-Fi y almacenamiento NVS | Implementado                 |
+| Teclado virtual                          | Implementado                 |
+| OTA                                      | Integración en progreso      |
+| Tetris                                   | Placeholder                  |
+| Pantalla de información                  | Placeholder                  |
+| PCB ESP-ARCADE Rev B                     | Diseño y routing en progreso |
 
-- Hardware abstraction (drivers)
-- System services (WiFi, OTA)
-- Core engine logic (state machine)
-- User interface (menu, keyboard, config)
-- Games
+> La aplicación que compila actualmente usa el pinout de ESP32 DevKit/Wokwi. El pinout de la PCB Rev B está documentado por separado y requiere una adaptación antes de usar el firmware en esa placa.
 
-This allows:
+## Características
 
-- SH1106 / SSD1306 OLED display compatibility (I²C, 128×64)
-- Modular game integration
-- OTA firmware updates via GitHub Releases
-- WiFi credential management with on-device virtual keyboard
-- Wokwi simulation support
-- Easy scalability for future hardware revisions
+- Arquitectura por capas: drivers, servicios, core, UI y juegos.
+- Compatible con controladores OLED SH1106 y SSD1306 mediante U8g2.
+- Menú navegable con seis botones: OK, BACK, UP, DOWN, LEFT y RIGHT.
+- Snake, Pong y Flappy Bird incluidos.
+- Wi-Fi con escaneo de redes, conexión y credenciales persistentes en NVS.
+- Teclado virtual para introducir contraseñas desde la consola.
+- Servicios de red ejecutados en una tarea FreeRTOS independiente.
+- Simulación reproducible con Wokwi.
+- Dos entornos PlatformIO: ESP32-S3 DevKit C-1 y ESP32 DevKit C.
 
----
+## Puesta en marcha
 
-# System Architecture
+### Requisitos
 
-```txt
-+--------------------------------------------------+
-|                    APPLICATION                   |
-|--------------------------------------------------|
-| Snake | Pong | Flappy Bird | Tetris (placeholder) |
-+--------------------------------------------------+
+- [PlatformIO](https://platformio.org/install/ide?install=vscode)
+- Opcional: [Wokwi for VS Code](https://docs.wokwi.com/vscode/getting-started)
 
-+--------------------------------------------------+
-|                    CORE ENGINE                   |
-|--------------------------------------------------|
-| SystemManager (state machine)                    |
-| MenuS (reusable generic menu)                    |
-| Input driver                                     |
-+--------------------------------------------------+
+### Compilar y cargar
 
-+--------------------------------------------------+
-|                    SYSTEM SERVICES               |
-|--------------------------------------------------|
-| WiFiService  (connection + NVS persistence)      |
-| OTAService   (GitHub Releases OTA update)        |
-+--------------------------------------------------+
+Desde la raíz del proyecto:
 
-+--------------------------------------------------+
-|                 HARDWARE ABSTRACTION             |
-|--------------------------------------------------|
-| Display Driver  (U8g2, SH1106/SSD1306 I2C)      |
-| Input Driver    (6 push-buttons)                 |
-| Time Driver     (millis wrapper)                 |
-+--------------------------------------------------+
+```bash
+# ESP32-S3 DevKit C-1
+pio run -e esp32-s3-devkitc-1
+pio run -e esp32-s3-devkitc-1 -t upload
 
-+--------------------------------------------------+
-|                     HARDWARE                     |
-|--------------------------------------------------|
-| ESP32 / ESP32-S3                                 |
-| SH1106 OLED 128×64 (I2C: SDA=21, SCL=22)        |
-| 6× Push-buttons (OK, BACK, UP, DOWN, LEFT, RIGHT)|
-| USB-C (power + programming)                      |
-+--------------------------------------------------+
+# ESP32 DevKit C / objetivo de Wokwi
+pio run -e esp32dev
+pio run -e esp32dev -t upload
 ```
 
----
+Monitor serie:
 
-# Project Structure
-
-```txt
-ESP-ARCADE/
-│
-├── diagram.json              ← Wokwi hardware wiring diagram
-├── platformio.ini            ← PlatformIO build config (esp32-s3-devkitc-1 + esp32dev)
-├── wokwi.toml                ← Wokwi simulation config + scenarios
-├── README.md
-│
-├── src/
-│   ├── main.cpp              ← Entry point: creates SystemManager, calls begin()/update()
-│   │
-│   ├── config/
-│   │   ├── display_config.h  ← Display controller selection (SH1106/SSD1306), I2C pins, resolution
-│   │   └── pins.h            ← Button GPIO definitions
-│   │
-│   ├── core/
-│   │   ├── system_manager.h  ← SystemManager class + State enum
-│   │   └── system_manager.cpp← Main state machine: MENU, SNAKE, PONG, TETRIS, CONFIG,
-│   │                            BIRD, WIFI_CONFIG, UPDATE_CONFIG, INFO
-│   │
-│   ├── core0/
-│   │   └── services/
-│   │       ├── wifi_service.h / .cpp   ← WiFiService: connect, scan, NVS persistence,
-│   │       │                             background FreeRTOS task, OTA check integration
-│   │       └── ota/
-│   │           ├── OTA.h / .cpp        ← OTAService: GitHub Releases version check,
-│   │                                     HTTPS firmware download, NVS version storage
-│   │
-│   ├── drivers/
-│   │   ├── display/
-│   │   │   ├── display.h               ← Display API: InitDisplay, ClearDisplay, DrawText,
-│   │   │   └── display.cpp               DrawBitmap, DrawLogo, DrawMenu, ActDisplay,
-│   │   │                                 DrawBox, SetCustomFont (SMALL/MEDIUM/LARGE)
-│   │   ├── input/
-│   │   │   ├── buttons.h               ← Input class + isPressed(), input extern instance
-│   │   │   └── buttons.cpp             ← Debounce logic, realDirection()
-│   │   └── time/
-│   │       ├── millis.h
-│   │       └── millis.cpp              ← millis() abstraction wrapper
-│   │
-│   ├── assets/
-│   │   └── images/
-│   │       ├── assets.h / .cpp         ← Asset includes
-│   │       ├── logo.h                  ← Boot logo bitmap (PROGMEM)
-│   │       └── pong_images/
-│   │           ├── pong_win.h          ← Win screen bitmap
-│   │           ├── pong_lose.h         ← Lose screen bitmap
-│   │           ├── scoreboard.h
-│   │           └── scoreboard.cpp      ← Score display logic
-│   │
-│   ├── games/
-│   │   ├── snake/
-│   │   │   ├── Snake.h                 ← Snake: max 50 segments, states (INIT/START/GAME_OVER/AGAIN)
-│   │   │   └── Snake.cpp
-│   │   ├── pong/
-│   │   │   ├── pong.h                  ← Pong: player vs AI, ball physics, win/lose screens
-│   │   │   └── pong.cpp
-│   │   └── pruebas/
-│   │       ├── pruebas.h               ← Flappy Bird: Pajaro + Pipe classes, collision detection
-│   │       └── pruebas.cpp
-│   │
-│   └── ui/
-│       ├── menu.h / menu.cpp           ← Main menu: render, update, confirm, back, index
-│       ├── keyboard.h / keyboard.cpp   ← VirtualKeyboard: 3 modes (lowercase/uppercase/numbers)
-│       │                                 30-char grid, word input for WiFi passwords
-│       └── config/
-│           ├── config_menu.h / .cpp    ← MenuS: reusable generic submenu (options + cursor)
-│           ├── WiFi/
-│           │   ├── wifi_display.h      ← WifiMenu: scan → select → password → connect flow
-│           │   └── wifi_display.cpp      States: SCANNING, SELECT_NETWORK, ENTER_PASSWORD,
-│           │                                     CONNECTING, CONNECTION_FAILED
-│           └── update/
-│               ├── update.h            ← UpdateMenu: wraps OTAService for UI-triggered update
-│               └── update.cpp
-│
-└── test/
-    ├── README
-    └── test_menu.cpp
+```bash
+pio device monitor -b 115200
 ```
 
----
+Para usar Wokwi, compila primero el entorno `esp32dev`. El firmware y el ELF esperados son:
 
-# Hardware Configuration
+```text
+.pio/build/esp32dev/firmware.bin
+.pio/build/esp32dev/firmware.elf
+```
 
-## Pin Mapping
+El escenario incluido, `Menu Games Navigation`, está definido en [wokwi.toml](wokwi.toml).
 
-| Function  | GPIO |
-| --------- | ---- |
-| BTN_OK    | 4    |
-| BTN_BACK  | 19   |
-| BTN_UP    | 17   |
-| BTN_DOWN  | 32   |
-| BTN_LEFT  | 12   |
-| BTN_RIGHT | 13   |
+## Controles y pantalla
 
-## Display (I²C OLED)
+### Pinout del firmware actual
 
-| Parameter   | Value                      |
-| ----------- | -------------------------- |
-| Controller  | SH1106 (default) / SSD1306 |
-| Resolution  | 128 × 64 px                |
-| I²C SDA     | GPIO 21                    |
-| I²C SCL     | GPIO 22                    |
-| I²C Address | 0x3C                       |
-| Reset Pin   | -1 (none)                  |
+| Función  | GPIO |
+| -------- | ---: |
+| OK       |    4 |
+| BACK     |   19 |
+| UP       |   17 |
+| DOWN     |   32 |
+| LEFT     |   12 |
+| RIGHT    |   13 |
+| OLED SDA |   21 |
+| OLED SCL |   22 |
+| OLED I2C | 0x3C |
 
-> Switch display controller in `src/config/display_config.h` by changing `DISPLAY_CONTROLLER`.
+La pantalla está configurada por defecto como SH1106 en [src/config/display_config.h](src/config/display_config.h). Para usar SSD1306, cambia `DISPLAY_CONTROLLER` en ese archivo.
 
-## Libraries
+### Navegación
 
-| Library     | Version  | Use                           |
-| ----------- | -------- | ----------------------------- |
-| U8g2        | ^2.35.19 | OLED display driver           |
-| ArduinoJson | ^6.20.0  | GitHub API JSON parsing (OTA) |
+- `UP` / `DOWN`: mover el cursor.
+- `OK`: confirmar una opción.
+- `BACK`: volver al menú anterior.
+- `LEFT` / `RIGHT`: controles direccionales de los juegos y del teclado virtual.
 
----
+## Arquitectura
 
-# Custom PCB (ESP-ARCADE Rev B)
+```text
+src/
+├── main.cpp                 Entrada de la aplicación
+├── config/                  Pines y configuración de pantalla
+├── core/                    Máquina de estados del sistema
+├── core0/services/          Wi-Fi y OTA
+├── drivers/                 Display, botones y tiempo
+├── games/                   Snake, Pong y Flappy Bird
+├── ui/                      Menú, teclado y configuración
+└── assets/                  Bitmaps y recursos gráficos
+```
 
-Besides the firmware, ESPARCADE has its own handheld board designed in **KiCad 10**: a 4-layer, 52 × 105 mm PCB (F.Cu / PWR / GND / B.Cu) built around an **ESP32-S3-WROOM-1** module, with the OLED and the controls on the front and the module and power electronics on the back.
+### Flujo de estados
+
+```text
+MENU
+├── SNAKE
+├── PONG
+├── TETRIS (placeholder)
+├── CONFIG
+│   ├── WIFI_CONFIG
+│   ├── UPDATE_CONFIG
+│   └── INFO (placeholder)
+└── BIRD
+```
+
+`SystemManager` coordina el estado actual, la entrada y el renderizado. Los juegos se actualizan desde el bucle principal y usan la capa de display en lugar de acceder directamente a U8g2.
+
+## Juegos
+
+### Snake
+
+- Movimiento basado en una cuadrícula.
+- Hasta 50 segmentos.
+- Estados de inicio, partida, game over y reinicio.
+- Comida generada en posiciones aleatorias.
+
+### Pong
+
+- Partida jugador contra IA.
+- Física básica de la pelota y rebotes en los límites.
+- Pantallas de victoria y derrota con bitmaps.
+
+### Flappy Bird
+
+- Gravedad y salto del pájaro.
+- Tuberías con huecos aleatorios.
+- Desplazamiento y detección de colisiones.
+
+## Wi-Fi y OTA
+
+`WiFiService` gestiona el escaneo, la conexión y la persistencia de SSID y contraseña mediante `Preferences`. La actividad de red se ejecuta en una tarea FreeRTOS separada para evitar bloquear la interfaz.
+
+El flujo de configuración Wi-Fi es:
+
+```text
+SCANNING -> SELECT_NETWORK -> ENTER_PASSWORD -> CONNECTING
+                                             └-> CONNECTION_FAILED
+```
+
+La integración OTA está preparada para consultar GitHub Releases y descargar firmware mediante `HTTPUpdate`. La pantalla y el flujo completo de actualización todavía están en desarrollo.
+
+## Hardware
+
+### Configuración de referencia
+
+- ESP32 DevKit C o ESP32-S3 DevKit C-1.
+- OLED I2C de 128 x 64, dirección `0x3C`.
+- Seis botones con pull-up/pull-down según el montaje.
+- Baudrate del monitor serie: `115200`.
+
+### PCB ESP-ARCADE Rev B
+
+La placa personalizada está diseñada alrededor de un ESP32-S3-WROOM-1 y mide 52 x 105 mm. Incluye:
+
+- OLED I2C de 1.3 pulgadas.
+- Batería LiPo 1S con BQ24070 y conector JST-PH.
+- Regulador buck-boost TPS631000.
+- Audio I2S con MAX98357A.
+- USB-C con protección ESD.
+- Conectores de expansión I2C, GPIO y UART.
+
+#### Board Features
+
+| Bloque              | Componente                                | Notas                                                                |
+| ------------------- | ----------------------------------------- | -------------------------------------------------------------------- |
+| MCU                 | ESP32-S3-WROOM-1                          | Wi-Fi y BLE, USB nativo, antena PCB en el borde                      |
+| Entrada USB         | Conector USB-C + USBLC6-2SC6              | Resistencias de 5.1 kOhm en CC y protección ESD para D+/D-           |
+| Batería             | BQ24070 + conector JST-PH                 | Cargador LiPo 1S con power-path; señales de estado conectadas al MCU |
+| Alimentación 3V3    | TPS631000 + inductor de 1 uH              | Mantiene estable la alimentación mientras se descarga la batería     |
+| Audio               | MAX98357A                                 | Amplificador clase D I2S con conector para altavoz                   |
+| Pantalla            | OLED I2C de 1.3 pulgadas                  | Header de 4 pines con pull-ups de 4.7 kOhm                           |
+| Controles           | 6 botones táctiles + RESET / BOOT / POWER | D-pad, SELECT y BACK                                                 |
+| Medición de batería | Divisor de 1 MOhm / 1 MOhm                | `VBAT_SENSE` conectado a ADC1                                        |
+| Expansión           | Headers I2C, GPIO y UART                  | Test points para VBUS, SYS, BAT+, 3V3, GND y LX2                     |
+
+Pinout previsto para la PCB:
+
+| Función    | GPIO | Función     | GPIO |
+| ---------- | ---: | ----------- | ---: |
+| BTN_UP     |   10 | OLED SDA    |    8 |
+| BTN_DOWN   |   11 | OLED SCL    |    9 |
+| BTN_LEFT   |   12 | I2S BCLK    |   38 |
+| BTN_RIGHT  |   13 | I2S LRCLK   |   39 |
+| BTN_SELECT |   14 | I2S DIN     |   40 |
+| BTN_BACK   |   15 | Amp SD_MODE |   41 |
+| POWER      |   21 | VBAT_SENSE  |    2 |
+
+> Este pinout es el objetivo de la PCB, no la configuración activa del firmware. La migración también deberá incorporar audio y lectura de batería.
+
+### Documentación visual
 
 <p align="center">
-  <img src="docs/images/pcb-3d-overview.png" alt="ESP-ARCADE PCB 3D render, front (left) and back (right)" width="720">
+  <img src="docs/images/pcb-3d-overview.png" alt="Vista 3D frontal y trasera de la PCB ESP-ARCADE" width="720">
 </p>
-
-<p align="center"><em>3D render — front side (OLED, D-pad, buttons) and back side (ESP32-S3, power, audio).</em></p>
-
-## Board Features
-
-| Block         | Part                          | Notes                                                        |
-| ------------- | ----------------------------- | ------------------------------------------------------------ |
-| MCU           | ESP32-S3-WROOM-1              | Wi-Fi + BLE, native USB, PCB antenna at the board edge       |
-| USB input     | USB-C receptacle + USBLC6-2SC6 | 5.1 kΩ CC pull-downs, ESD protection on D+/D-                |
-| Battery       | BQ24070 + JST-PH connector    | 1S LiPo charger with power-path (`SYS`), status/PG signals to the MCU |
-| 3V3 rail      | TPS631000 buck-boost + 1 µH   | Keeps 3V3 stable while the battery discharges                |
-| Audio         | MAX98357A (I²S class-D amp)   | 2-pin speaker header, `SD_MODE` controlled by the MCU        |
-| Display       | 1.3" 128×64 OLED (I²C)        | 4-pin header, 4.7 kΩ pull-ups                                |
-| Controls      | 6 tactile buttons + RESET / BOOT / POWER | D-pad, SELECT and BACK                            |
-| Battery gauge | 1 MΩ / 1 MΩ divider → ADC1    | `VBAT_SENSE` on GPIO2                                        |
-| Expansion     | I²C, GPIO (IO4–IO7) and UART headers | Test points on VBUS, SYS, BAT+, 3V3, GND, LX2         |
 
 <p align="center">
-  <img src="docs/images/pcb-top-3d.png" alt="PCB front side" width="340">
-  <img src="docs/images/pcb-bottom-3d.png" alt="PCB back side" width="340">
+  <img src="docs/images/pcb-schematic.png" alt="Esquemático de la PCB ESP-ARCADE" width="720">
 </p>
 
-## Schematic
+Estado de la placa: esquemático completado con ERC sin errores; colocación y stackup de cuatro capas definidos; routing todavía en progreso.
 
-<p align="center">
-  <img src="docs/images/pcb-schematic.png" alt="ESP-ARCADE schematic, ESP32-S3-WROOM-1 board Rev B" width="100%">
-</p>
+## Dependencias
 
-## PCB Pin Mapping (ESP32-S3)
+Las dependencias se declaran en [platformio.ini](platformio.ini):
 
-| Function       | GPIO | Function        | GPIO |
-| -------------- | ---- | --------------- | ---- |
-| BTN_UP         | 10   | OLED I²C SDA    | 8    |
-| BTN_DOWN       | 11   | OLED I²C SCL    | 9    |
-| BTN_LEFT       | 12   | I²S BCLK        | 38   |
-| BTN_RIGHT      | 13   | I²S LRCLK       | 39   |
-| BTN_SELECT (OK)| 14   | I²S DIN         | 40   |
-| BTN_BACK       | 15   | Amp SD_MODE     | 41   |
-| POWER button   | 21   | VBAT_SENSE (ADC)| 2    |
-| CHG_PG         | 16   | CHG_STAT1 / 2   | 1 / 18 |
-| USB D- / D+    | 19 / 20 | UART TX / RX | 43 / 44 |
+| Librería    | Versión    | Uso                                     |
+| ----------- | ---------- | --------------------------------------- |
+| U8g2        | `^2.35.19` | Driver de pantalla OLED                 |
+| ArduinoJson | `^6.20.0`  | Procesamiento de respuestas JSON de OTA |
 
-> ⚠️ The firmware in `src/config/` still uses the ESP32 DevKit / Wokwi pin map (see [Hardware Configuration](#hardware-configuration)). Porting it to the PCB pin map, plus audio and battery support, is on the roadmap.
+## Estructura de una nueva integración
 
-## Hardware Status
+Para añadir un juego:
 
-- ✅ Schematic complete (KiCad ERC: 0 errors)
-- ✅ Component placement, board outline and 4-layer stackup
-- 🚧 Layout routing in progress — KiCad DRC reports no clearance/short errors, but not every net is routed yet
-- ⏳ Board not manufactured yet
+1. Crea una carpeta en `src/games/<nombre>/`.
+2. Añade la declaración y la lógica del juego.
+3. Incorpora un nuevo estado en `SystemManager::State`.
+4. Conecta el estado en el menú y en `SystemManager::update()`.
+5. Compila ambos entornos antes de probarlo en hardware o Wokwi.
 
----
+## Roadmap
 
-# Build Targets
+- Completar el flujo de actualización OTA desde la UI.
+- Implementar Tetris y la pantalla de información.
+- Migrar la configuración de pines a la PCB Rev B.
+- Añadir audio I2S y lectura del nivel de batería.
+- Finalizar el routing y validar la PCB fabricada.
+- Ampliar las pruebas automatizadas de menú y navegación.
 
-Defined in `platformio.ini`:
+## Licencia
 
-| Environment          | Board               | Notes                   |
-| -------------------- | ------------------- | ----------------------- |
-| `esp32-s3-devkitc-1` | ESP32-S3 DevKit C-1 | Primary target hardware |
-| `esp32dev`           | ESP32 DevKit C      | Wokwi simulation target |
-
-Monitor baud rate: **115200**
-
----
-
-# State Machine
-
-`SystemManager` manages all application states via a simple enum-based FSM:
-
-```txt
-STATE_MENU
-  ├── [0] → STATE_SNAKE        (Snake game)
-  ├── [1] → STATE_PONG         (Pong game)
-  ├── [2] → STATE_TETRIS       (placeholder — no game logic yet)
-  ├── [3] → STATE_CONFIG       (config submenu)
-  │            ├── [0] → STATE_WIFI_CONFIG    (WiFi scan + connect)
-  │            ├── [1] → STATE_UPDATE_CONFIG  (OTA firmware update)
-  │            └── [2] → STATE_INFO           (placeholder)
-  └── [4] → STATE_BIRD         (Flappy Bird game)
-```
-
-Back button always returns to the previous state.
-
----
-
-# Implemented Games
-
-## Snake ✅
-
-- Grid-based movement on the 128×64 OLED
-- Up to 50 body segments
-- States: `INIT → START → GAME_OVER → AGAIN`
-- Randomly spawned food
-
-## Pong ✅
-
-- Player vs AI paddle game
-- Ball physics with speed and screen boundaries
-- Win/Lose bitmap screens via scoreboard
-- AI auto-tracks the ball
-
-## Flappy Bird ✅
-
-- `Pajaro` class with gravity and jump mechanics
-- `Pipe` class with randomized gaps and collision detection
-- Scrolling pipes
-
-## Tetris ⚠️ (Placeholder)
-
-- State registered in SystemManager
-- No game logic implemented yet
-
----
-
-# WiFi & OTA System
-
-## WiFiService
-
-- Stores SSID/password to NVS (non-volatile storage) using `Preferences`
-- Scans available networks
-- Connects to saved or new network
-- Runs a background FreeRTOS task (`networkTaskProvider`) on Core 0
-- Automatically triggers OTA version check after connection
-
-## OTAService
-
-- Fetches latest release tag from **GitHub Releases API** via HTTPS
-- Compares against current firmware version (stored in NVS)
-- Downloads and applies firmware binary if a newer version is available
-- Uses `HTTPUpdate` for seamless OTA flashing
-
-## WifiMenu UI
-
-Full on-screen WiFi configuration flow:
-
-```txt
-SCANNING → SELECT_NETWORK → ENTER_PASSWORD → CONNECTING → (success / CONNECTION_FAILED)
-```
-
-- Network list navigation with UP/DOWN buttons
-- Password entered via `VirtualKeyboard`
-
-## VirtualKeyboard
-
-- 3×10 character grid
-- 3 modes: lowercase, uppercase, numbers/symbols
-- Used for WiFi password entry
-
----
-
-# Dual-Core FreeRTOS Usage
-
-| Core   | Responsibilities                                        |
-| ------ | ------------------------------------------------------- |
-| Core 0 | WiFi connection management, OTA check (background task) |
-| Core 1 | Game loop, rendering, input handling (Arduino loop)     |
-
-This separation ensures WiFi/OTA operations do not block gameplay or UI rendering.
-
----
-
-# Wokwi Simulation
-
-The project supports simulation via [Wokwi](https://wokwi.com/).
-
-- Hardware defined in `diagram.json`: ESP32 DevKit C + 6 push-buttons + SSD1306 OLED
-- Simulation config in `wokwi.toml`
-- Included test scenario: **Menu Games Navigation** (button press → screenshot at 6s)
-- Firmware target: `.pio/build/esp32dev/firmware.bin`
-
----
-
-# Display Abstraction
-
-The display driver (`src/drivers/display/`) wraps U8g2 and exposes a simple API:
-
-```cpp
-void InitDisplay();
-void ClearDisplay();
-void ActDisplay();                       // push buffer to screen
-void DrawText(int x, int y, const char *text);
-void DrawBitmap(const unsigned char *bitmap, int w, int h);
-void DrawBox(int x, int y, int l, int w);
-void SetCustomFont(FontSize size);       // FONT_SMALL | FONT_MEDIUM | FONT_LARGE
-void DrawLogo();                         // boot logo (PROGMEM bitmap)
-void DrawMenu();                         // main menu background graphic
-```
-
-Games and UI never touch U8g2 directly — they go through this layer.
-
----
-
-# Game Architecture
-
-All games are invoked as free functions from `SystemManager::update()`:
-
-```cpp
-snake_game();         // Snake
-pong::game_pong();    // Pong
-flappy_bird();        // Flappy Bird
-```
-
-The `Pajaro` and `Pipe` classes in Flappy Bird demonstrate object-oriented game entity design. Snake and Pong use a procedural style with global state.
-
-Future games can be added by:
-
-1. Creating a folder under `src/games/<name>/`
-2. Adding a new `State` to `SystemManager::State`
-3. Calling the game's update function in the `switch` inside `SystemManager::update()`
-
----
-
-# Development Roadmap
-
-| Feature             | Status         |
-| ------------------- | -------------- |
-| Snake               | ✅ Implemented |
-| Pong                | ✅ Implemented |
-| Flappy Bird         | ✅ Implemented |
-| Tetris              | ⚠️ Placeholder |
-| WiFi Manager UI     | ✅ Implemented |
-| OTA Update UI       | ✅ Implemented |
-| Info screen         | ⚠️ Placeholder |
-| Virtual Keyboard    | ✅ Implemented |
-| Boot logo           | ✅ Implemented |
-| Wokwi simulation    | ✅ Configured  |
-| NVS credential save | ✅ Implemented |
-| Dual-core FreeRTOS  | ✅ Implemented |
-
----
-
-# Development Philosophy
-
-ESPARCADE is designed around:
-
-- Modular firmware architecture
-- Hardware abstraction layer (display + input decoupled from game logic)
-- Maintainability and clean separation of concerns
-- Professional embedded development practices (FreeRTOS, NVS, HTTPS OTA)
-- Wokwi-based simulation for fast iteration without hardware
-
-**Goal:** Build a professional-grade ESP32 handheld gaming platform suitable for embedded systems portfolio and firmware engineering experience.
+Este repositorio no declara todavía una licencia. Añade una licencia antes de distribuir el firmware o reutilizarlo en otros proyectos.
