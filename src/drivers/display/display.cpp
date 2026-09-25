@@ -37,6 +37,26 @@ void DrawText(int x, int y, const char *text)
 }
 
 /**
+ * @brief Funcion que agrega texto centrado horizontalmente en la pantalla
+ * @param y Coordenada en el eje Y (linea base del texto)
+ * @param text Ingresa el texto como String
+ */
+void DrawTextCentered(int y, const char *text)
+{
+    int x = (ANCHO_PANTALLA - (int)display.getStrWidth(text)) / 2;
+    display.drawStr(x, y, text);
+}
+
+/**
+ * @brief Funcion que regresa el ancho en pixeles de un texto con la fuente actual
+ * @param text Ingresa el texto como String
+ */
+int TextWidth(const char *text)
+{
+    return display.getStrWidth(text);
+}
+
+/**
  * @brief Funcion que inicia el display
  */
 void InitDisplay()
@@ -67,6 +87,20 @@ void DrawBitmap(const unsigned char *bitmap, int width, int height)
     display.clearBuffer();
     display.drawXBMP(0, 0, width, height, bitmap);
     display.sendBuffer();
+}
+
+/**
+ * @brief Funcion que dibuja un mapa de bits en una posicion sin limpiar ni enviar el buffer.
+ * Sirve para fondos y sprites: se dibuja primero y lo demas va encima.
+ * @param x Coordenada en el eje X
+ * @param y Coordenada en el eje Y
+ * @param width El ancho del mapa
+ * @param height El alto del mapa
+ * @param bitmap la direccion de mapa de bits
+ */
+void DrawImage(int x, int y, int width, int height, const unsigned char *bitmap)
+{
+    display.drawXBMP(x, y, width, height, bitmap);
 }
 
 /**
@@ -135,7 +169,7 @@ bool wait(unsigned long durationMs)
 
 /**
  * @brief Cambia el tamaño de la fuente de la pantalla OLED.
- * @param size El tamaño deseado (1 = Chico, 2 = Mediano, 3 = Grande).
+ * @param size El tamaño deseado (1 = Chico, 2 = Mediano, 3 = Grande, FONT_TINY = 5x7 para datos).
  */
 void SetCustomFont(FontSize size)
 {
@@ -149,6 +183,9 @@ void SetCustomFont(FontSize size)
         break;
     case FONT_LARGE:
         display.setFont(u8g2_font_ncenB24_tr);
+        break;
+    case FONT_TINY:
+        display.setFont(u8g2_font_5x7_tr);
         break;
     }
 }

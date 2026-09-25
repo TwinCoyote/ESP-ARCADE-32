@@ -175,14 +175,14 @@ void body()
 
 // void beta(){
 //   for (int i = 0; i < largo; i++) {
-//   Serial.print("Segmento ");
-//   Serial.print(i);
-//   Serial.print(": X=");
-//   Serial.print(snake_x[i]);
-//   Serial.print(" Y=");
-//   Serial.println(snake_y[i]);
+//   DEV_PRINT("Segmento ");
+//   DEV_PRINT(i);
+//   DEV_PRINT(": X=");
+//   DEV_PRINT(snake_x[i]);
+//   DEV_PRINT(" Y=");
+//   DEV_PRINTLN(snake_y[i]);
 // }
-// Serial.println("----");
+// DEV_PRINTLN("----");
 // }
 
 void lose_conditions()

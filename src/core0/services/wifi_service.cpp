@@ -2,6 +2,7 @@
 #include "wifi_service.h"
 #include <WiFi.h>
 #include "ota/OTA.h"
+#include "../../config/debug_log.h"
 
 // static const char *OTA_CURRENT_VERSION = "v1.0.5"; // TODO: Hacer que el valor lo tome de la variable en la nvs.
 
@@ -29,8 +30,8 @@ void WiFiService::begin()
             _ssid = savedSSID;
             _password = savedPASS;
             hasCredentials = true;
-            Serial.print("Loaded saved WiFi SSID: ");
-            Serial.println(_ssid);
+            DEV_PRINT("Loaded saved WiFi SSID: ");
+            DEV_PRINTLN(_ssid);
         }
         else
         {
@@ -46,21 +47,21 @@ void WiFiService::begin()
                     _ssid = NetWorkSaved;
                     _password = PASSSaved;
                     hasCredentials = true;
-                    Serial.print("Loaded legacy WiFi SSID: ");
-                    Serial.println(_ssid);
+                    DEV_PRINT("Loaded legacy WiFi SSID: ");
+                    DEV_PRINTLN(_ssid);
                 }
             }
 
             if (!hasCredentials)
             {
-                Serial.println("No stored WiFi credentials found.");
+                DEV_PRINTLN("No stored WiFi credentials found.");
             }
         }
         _prefs.end();
     }
     else
     {
-        Serial.println("Unable to open WiFi credentials storage; skipping auto-connect.");
+        DEV_PRINTLN("Unable to open WiFi credentials storage; skipping auto-connect.");
     }
 
     if (hasCredentials)
@@ -83,7 +84,7 @@ void WiFiService::connect(const char *ssid, const char *password)
 
     if (_ssid.length() == 0)
     {
-        Serial.println("No SSID provided; skipping WiFi connect.");
+        DEV_PRINTLN("No SSID provided; skipping WiFi connect.");
         return;
     }
 
@@ -122,32 +123,32 @@ void WiFiService::printMacAddress()
 
     //* print your MAC address:
     WiFi.macAddress(mac);
-    Serial.print("MAC: ");
-    Serial.print(mac[5], HEX);
-    Serial.print(":");
-    Serial.print(mac[4], HEX);
-    Serial.print(":");
-    Serial.print(mac[3], HEX);
-    Serial.print(":");
-    Serial.print(mac[2], HEX);
-    Serial.print(":");
-    Serial.print(mac[1], HEX);
-    Serial.print(":");
-    Serial.println(mac[0], HEX);
+    DEV_PRINT("MAC: ");
+    DEV_PRINT(mac[5], HEX);
+    DEV_PRINT(":");
+    DEV_PRINT(mac[4], HEX);
+    DEV_PRINT(":");
+    DEV_PRINT(mac[3], HEX);
+    DEV_PRINT(":");
+    DEV_PRINT(mac[2], HEX);
+    DEV_PRINT(":");
+    DEV_PRINT(mac[1], HEX);
+    DEV_PRINT(":");
+    DEV_PRINTLN(mac[0], HEX);
 }
 
 void WiFiService::listNetworks()
 {
-    Serial.println("** Scan Networks **");
+    DEV_PRINTLN("** Scan Networks **");
     int numSsid = WiFi.scanNetworks();
     if (numSsid == -1)
     {
-        Serial.println("Couldn't get a WiFi connection");
+        DEV_PRINTLN("Couldn't get a WiFi connection");
         return;
     }
 
-    Serial.print("number of available networks:");
-    Serial.println(numSsid);
+    DEV_PRINT("number of available networks:");
+    DEV_PRINTLN(numSsid);
 
     _networksLists.clear();
     for (int thisNet = 0; thisNet < numSsid; thisNet++)
@@ -166,22 +167,22 @@ void WiFiService::printEncryptionType(int thisType)
     switch (thisType)
     {
     case WIFI_AUTH_WEP:
-        Serial.println("WEP");
+        DEV_PRINTLN("WEP");
         break;
     case WIFI_AUTH_WPA_PSK:
-        Serial.println("WPA");
+        DEV_PRINTLN("WPA");
         break;
     case WIFI_AUTH_WPA2_PSK:
-        Serial.println("WPA2");
+        DEV_PRINTLN("WPA2");
         break;
     case WIFI_AUTH_OPEN:
-        Serial.println("None");
+        DEV_PRINTLN("None");
         break;
     case WIFI_AUTH_WPA_WPA2_PSK:
-        Serial.println("WPA/WPA2");
+        DEV_PRINTLN("WPA/WPA2");
         break;
     default:
-        Serial.println("Unknown");
+        DEV_PRINTLN("Unknown");
         break;
     }
 }
@@ -224,11 +225,11 @@ void WiFiService::update()
 
 //         if (_isConnected && !_otaChecked)
 //         {
-//             Serial.println("[Core 0] ¡Wi-Fi Listo! Buscando actualizaciones de fondo...");
+//             DEV_PRINTLN("[Core 0] ¡Wi-Fi Listo! Buscando actualizaciones de fondo...");
 
 //             _otaChecked = true;
 //             _ota.performUpdate();
-//             Serial.println("[Core 0] Consola al día. Volviendo a tareas de red cotidianas.");
+//             DEV_PRINTLN("[Core 0] Consola al día. Volviendo a tareas de red cotidianas.");
 //         }
 //         vTaskDelay(pdMS_TO_TICKS(100));
 //     }
@@ -241,7 +242,7 @@ void WiFiService::update()
 //         update();
 //         if (isConnected())
 //         {
-//             Serial.println("WiFi connected!");
+//             DEV_PRINTLN("WiFi connected!");
 //             break;
 //         }
 //         vTaskDelay(pdMS_TO_TICKS(500));
@@ -250,7 +251,7 @@ void WiFiService::update()
 
 //     if (!isConnected())
 //     {
-//         Serial.println("WiFi connection failed");
+//         DEV_PRINTLN("WiFi connection failed");
 //         WiFi.disconnect();
 //     }
 
@@ -273,16 +274,16 @@ void WiFiService::networkLoop()
 
     if (isConnected())
     {
-        Serial.println("\n[Core 0] WiFi connected!");
+        DEV_PRINTLN("\n[Core 0] WiFi connected!");
         // Lee la versión guardada en NVS ahora que el sistema está listo
         String savedVersion = OTAService::readVersion();
-        // Serial.print("NVS: savedVersion leida en networkLoop = ");
-        // Serial.println(savedVersion);
+        // DEV_PRINT("NVS: savedVersion leida en networkLoop = ");
+        // DEV_PRINTLN(savedVersion);
         _ota.setVersion(savedVersion);
     }
     else
     {
-        Serial.println("\n[Core 0] WiFi connection failed. Apagando antena.");
+        DEV_PRINTLN("\n[Core 0] WiFi connection failed. Apagando antena.");
         WiFi.disconnect();
         vTaskDelete(NULL);
     }
@@ -293,10 +294,10 @@ void WiFiService::networkLoop()
 
         if (_isConnected && !_otaChecked)
         {
-            Serial.println("[Core 0] ¡Wi-Fi Listo! Buscando actualizaciones de fondo...");
+            DEV_PRINTLN("[Core 0] ¡Wi-Fi Listo! Buscando actualizaciones de fondo...");
             _otaChecked = true;
             _ota.performUpdate();
-            Serial.println("[Core 0] Consola al día. Volviendo a tareas de red cotidianas.");
+            DEV_PRINTLN("[Core 0] Consola al día. Volviendo a tareas de red cotidianas.");
         }
 
         vTaskDelay(pdMS_TO_TICKS(1000));
@@ -320,7 +321,7 @@ void WiFiService::connectToNewNetwork(const char *ssid, const char *password)
     _prefs.putString("pass", _password);
 
     _prefs.end();
-    Serial.println("Nuevas credenciales guardadas con éxito en la Flash.");
+    DEV_PRINTLN("Nuevas credenciales guardadas con éxito en la Flash.");
     WiFi.disconnect();
     WiFi.begin(_ssid, _password);
 }

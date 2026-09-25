@@ -5,14 +5,17 @@
 #include "../drivers/input/buttons.h"
 #include "../games/snake/Snake.h"
 #include "../games/pong/pong.h"
-#include "../games/pruebas/pruebas.h"
+#include "../games/flappy_bird/flappy_bird.h"
 #include "../ui/config/config_menu.h"
 #include "../ui/config/WiFi/wifi_display.h"
 #include "../ui/config/update/update.h"
+#include "../ui/config/info/info.h"
+#include "../config/debug_log.h"
 
 bool primeraVez = true;
 static WiFiService wifiService("", "");
 static WifiMenu wifiMenu;
+static InfoMenu infoMenu;
 
 void SystemManager::begin()
 {
@@ -20,37 +23,37 @@ void SystemManager::begin()
     //
     // delay(500);
 
-    // Serial.println("--- INFORMACIÓN DEL SILICIO ---");
+    // DEV_PRINTLN("--- INFORMACIÓN DEL SILICIO ---");
 
-    // Serial.print("Modelo de ESP32: ");
-    // Serial.println(ESP.getChipModel());
+    // DEV_PRINT("Modelo de ESP32: ");
+    // DEV_PRINTLN(ESP.getChipModel());
 
-    // Serial.print("Núcleos de CPU: ");
-    // Serial.println(ESP.getChipCores());
+    // DEV_PRINT("Núcleos de CPU: ");
+    // DEV_PRINTLN(ESP.getChipCores());
 
-    // Serial.print("Tamaño de Flash: ");
-    // Serial.print(ESP.getFlashChipSize() / (1024 * 1024));
-    // Serial.println(" MB");
+    // DEV_PRINT("Tamaño de Flash: ");
+    // DEV_PRINT(ESP.getFlashChipSize() / (1024 * 1024));
+    // DEV_PRINTLN(" MB");
 
-    // Serial.print("¿Tiene PSRAM?: ");
+    // DEV_PRINT("¿Tiene PSRAM?: ");
     // if (psramInit())
     // {
-    //     Serial.print("SÍ, tamaño: ");
-    //     Serial.print(ESP.getPsramSize() / 1024);
-    //     Serial.println(" KB");
+    //     DEV_PRINT("SÍ, tamaño: ");
+    //     DEV_PRINT(ESP.getPsramSize() / 1024);
+    //     DEV_PRINTLN(" KB");
     // }
     // else
     // {
-    //     Serial.println("NO (Solo los 520KB de SRAM interna)");
+    //     DEV_PRINTLN("NO (Solo los 520KB de SRAM interna)");
     // }
-    // Serial.println("--------------------------------");
+    // DEV_PRINTLN("--------------------------------");
 
     // //
     input.begin();
     InitDisplay();
     ClearDisplay();
     DrawLogo();
-    delay(500);
+    delay(1000);
     ClearDisplay();
     DrawMenu();
     ActDisplay();
@@ -83,29 +86,29 @@ void SystemManager::update()
             {
                 // case 0:
                 //     currentState = STATE_MENU;
-                //     Serial.println("Switching to Menu");
+                //     DEV_PRINTLN("Switching to Menu");
 
                 //     break;
 
             case 0:
                 currentState = STATE_SNAKE;
-                Serial.println("Switching to Snake");
+                DEV_PRINTLN("Switching to Snake");
                 break;
             case 1:
                 currentState = STATE_PONG;
-                Serial.println("Switching to Pong");
+                DEV_PRINTLN("Switching to Pong");
                 break;
             case 2:
                 currentState = STATE_TETRIS;
-                Serial.println("Switching to Tetris");
+                DEV_PRINTLN("Switching to Tetris");
                 break;
             case 3:
                 currentState = STATE_CONFIG;
-                Serial.println("Switching to Config");
+                DEV_PRINTLN("Switching to Config");
                 break;
             case 4:
                 currentState = STATE_BIRD;
-                Serial.print("Switching to Flappy Bird");
+                DEV_PRINT("Switching to Flappy Bird");
                 break;
 
             default:
@@ -179,7 +182,7 @@ void SystemManager::update()
                         currentState = STATE_MENU;
                         primeraVez = true;
                     }
-                    Serial.println("Config -> Wifi selected");
+                    DEV_PRINTLN("Config -> Wifi selected");
                     currentState = STATE_WIFI_CONFIG;
                     wifiMenu.init(&wifiService);
                     break;
@@ -189,20 +192,15 @@ void SystemManager::update()
                         currentState = STATE_MENU;
                         primeraVez = true;
                     }
-                    Serial.println("Config -> Update selected");
+                    DEV_PRINTLN("Config -> Update selected");
                     currentState = STATE_UPDATE_CONFIG;
-
 
                     // TODO: make the display for update firmware and the functions
                     break;
                 case 2:
-                    if (MenuBack())
-                    {
-                        currentState = STATE_MENU;
-                        primeraVez = true;
-                    }
-                    Serial.println("Config -> Info selected");
-
+                    DEV_PRINTLN("Config -> Info selected");
+                    currentState = STATE_INFO;
+                    infoMenu.reset();
                     break;
                 default:
                     break;
@@ -242,6 +240,17 @@ void SystemManager::update()
             }
             static UpdateMenu menuUpdate;
             menuUpdate.logicUpdateMenu();
+            break;
+        }
+        case STATE_INFO:
+        {
+            // Info maneja su propio BACK: la B del codigo secreto no debe sacarte de la pantalla
+            if (infoMenu.update())
+            {
+                currentState = STATE_CONFIG;
+                break;
+            }
+            infoMenu.render();
             break;
         }
 

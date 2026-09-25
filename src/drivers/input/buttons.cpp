@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "buttons.h"
+#include "../../../src/config/debug_log.h"
 
 // Global Input instance for the project
 Input input(BTN_UP, BTN_DOWN, BTN_RIGHT, BTN_LEFT, BTN_OK, BTN_BACK);
@@ -59,10 +60,28 @@ void InitButtons()
     pinMode(BTN_LEFT, INPUT_PULLUP);
     pinMode(BTN_RIGHT, INPUT_PULLUP);
     // Diagnostic output: list pins and their current digitalRead value
-    Serial.print("InitButtons pins: OK="); Serial.print(BTN_OK); Serial.print(" val="); Serial.print(digitalRead(BTN_OK));
-    Serial.print(" BACK="); Serial.print(BTN_BACK); Serial.print(" val="); Serial.print(digitalRead(BTN_BACK));
-    Serial.print(" UP="); Serial.print(BTN_UP); Serial.print(" val="); Serial.print(digitalRead(BTN_UP));
-    Serial.print(" DOWN="); Serial.print(BTN_DOWN); Serial.print(" val="); Serial.print(digitalRead(BTN_DOWN));
-    Serial.print(" LEFT="); Serial.print(BTN_LEFT); Serial.print(" val="); Serial.print(digitalRead(BTN_LEFT));
-    Serial.print(" RIGHT="); Serial.print(BTN_RIGHT); Serial.print(" val="); Serial.println(digitalRead(BTN_RIGHT));
+    DEV_PRINT("InitButtons pins: OK=");
+    DEV_PRINT(BTN_OK);
+    DEV_PRINT(" val=");
+    DEV_PRINT(digitalRead(BTN_OK));
+    DEV_PRINT(" BACK=");
+    DEV_PRINT(BTN_BACK);
+    DEV_PRINT(" val=");
+    DEV_PRINT(digitalRead(BTN_BACK));
+    DEV_PRINT(" UP=");
+    DEV_PRINT(BTN_UP);
+    DEV_PRINT(" val=");
+    DEV_PRINT(digitalRead(BTN_UP));
+    DEV_PRINT(" DOWN=");
+    DEV_PRINT(BTN_DOWN);
+    DEV_PRINT(" val=");
+    DEV_PRINT(digitalRead(BTN_DOWN));
+    DEV_PRINT(" LEFT=");
+    DEV_PRINT(BTN_LEFT);
+    DEV_PRINT(" val=");
+    DEV_PRINT(digitalRead(BTN_LEFT));
+    DEV_PRINT(" RIGHT=");
+    DEV_PRINT(BTN_RIGHT);
+    DEV_PRINT(" val=");
+    DEV_PRINTLN(digitalRead(BTN_RIGHT));
 }

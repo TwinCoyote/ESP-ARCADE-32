@@ -70,15 +70,15 @@ void test_MenuUpdate_increments_six_times_with_six_presses()
 {
     indexMenu = 0;
     pressedRight = true;
-    Serial.println("Simulando 6 pulsaciones de BTN_RIGHT...");
+    DEV_PRINTLN("Simulando 6 pulsaciones de BTN_RIGHT...");
     for (int i = 0; i < 6; i++)
     {
         MenuUpdate();
         renderCurrentMenu();
-        Serial.print("Conteo tras pulsacion ");
-        Serial.print(i + 1);
-        Serial.print(": ");
-        Serial.println(indexMenu);
+        DEV_PRINT("Conteo tras pulsacion ");
+        DEV_PRINT(i + 1);
+        DEV_PRINT(": ");
+        DEV_PRINTLN(indexMenu);
     }
     TEST_ASSERT_EQUAL_INT(2, indexMenu);
 }
@@ -97,15 +97,15 @@ void test_MenuUpdate_decrements_six_times_with_six_presses()
     indexMenu = 0;
     pressedRight = false;
     pressedLeft = true;
-    Serial.println("Simulando 6 pulsaciones de BTN_LEFT...");
+    DEV_PRINTLN("Simulando 6 pulsaciones de BTN_LEFT...");
     for (int i = 0; i < 6; i++)
     {
         MenuUpdate();
         renderCurrentMenu();
-        Serial.print("Conteo tras pulsacion ");
-        Serial.print(i + 1);
-        Serial.print(": ");
-        Serial.println(indexMenu);
+        DEV_PRINT("Conteo tras pulsacion ");
+        DEV_PRINT(i + 1);
+        DEV_PRINT(": ");
+        DEV_PRINTLN(indexMenu);
     }
     TEST_ASSERT_EQUAL_INT(2, indexMenu);
 }

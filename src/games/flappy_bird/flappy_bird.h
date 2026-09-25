@@ -38,6 +38,7 @@ public:
     void move();
     void render();
     bool checkCollision(int pajaroX, int pajaroY, int pajaroSize);
+    void GameOver();
 };
 
 void flappy_bird();

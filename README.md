@@ -16,7 +16,7 @@ El proyecto está organizado por capas para que los juegos, la interfaz y los se
 | Teclado virtual                          | Implementado                 |
 | OTA                                      | Integración en progreso      |
 | Tetris                                   | Placeholder                  |
-| Pantalla de información                  | Placeholder                  |
+| Pantalla de información                  | Implementado                 |
 | PCB ESP-ARCADE Rev B                     | Diseño y routing en progreso |
 
 > La aplicación que compila actualmente usa el pinout de ESP32 DevKit/Wokwi. El pinout de la PCB Rev B está documentado por separado y requiere una adaptación antes de usar el firmware en esa placa.
@@ -118,7 +118,7 @@ MENU
 ├── CONFIG
 │   ├── WIFI_CONFIG
 │   ├── UPDATE_CONFIG
-│   └── INFO (placeholder)
+│   └── INFO
 └── BIRD
 ```
 
@@ -240,12 +240,8 @@ Para añadir un juego:
 ## Roadmap
 
 - Completar el flujo de actualización OTA desde la UI.
-- Implementar Tetris y la pantalla de información.
+- Implementar Tetris.
 - Migrar la configuración de pines a la PCB Rev B.
 - Añadir audio I2S y lectura del nivel de batería.
 - Finalizar el routing y validar la PCB fabricada.
 - Ampliar las pruebas automatizadas de menú y navegación.
-
-## Licencia
-
-Este repositorio no declara todavía una licencia. Añade una licencia antes de distribuir el firmware o reutilizarlo en otros proyectos.

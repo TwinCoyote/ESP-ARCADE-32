@@ -1,6 +1,8 @@
 #include "wifi_display.h"
 #include "../../../drivers/display/display.h"
 #include "../../../drivers/time/millis.h"
+#include "../../../assets/images/scanning.h"
+#include "../../../config/debug_log.h"
 
 WifiMenu::WifiMenu()
     : selectedNetworkIndex(0),
@@ -41,13 +43,9 @@ void WifiMenu::scanNetworks()
         return; // Skip if scanned recently
     }
 
-    Serial.println("Scanning WiFi networks...");
-    ClearDisplay();
-    SetCustomFont(FONT_SMALL);
-    SetMenuFont();
-    DrawText(20, 30, "Scanning...");
-    // TODO: Poner un bitmap de mi imagen cargando
-    ActDisplay();
+    DEV_PRINTLN("Scanning WiFi networks...");
+    // Se queda en pantalla mientras WiFi.scanNetworks() busca redes
+    DrawBitmap(ScanningBitmap, scanningWidth, scanningHeight);
 
     networksList.clear();
     WiFi.mode(WIFI_STA);
@@ -55,14 +53,14 @@ void WifiMenu::scanNetworks()
 
     int numNetworks = WiFi.scanNetworks();
 
-    if (numNetworks == -1)
+    if (numNetworks < 0) // WIFI_SCAN_FAILED es -2 (el -1 solo existe en modo asincrono)
     {
-        Serial.println("WiFi scan failed");
-        return;
+        DEV_PRINTLN("WiFi scan failed");
+        numNetworks = 0; // se trata igual que si no hubiera redes
     }
 
-    Serial.print("Found networks: ");
-    Serial.println(numNetworks);
+    DEV_PRINT("Found networks: ");
+    DEV_PRINTLN(numNetworks);
 
     for (int i = 0; i < numNetworks; i++)
     {
@@ -80,18 +78,17 @@ void WifiMenu::scanNetworks()
         if (!isDuplicate && ssid.length() > 0)
         {
             networksList.push_back(ssid);
-            Serial.print("  ");
-            Serial.println(ssid);
+            DEV_PRINT("  ");
+            DEV_PRINTLN(ssid);
         }
     }
 
     lastScanTime = now;
 
-    if (!networksList.empty())
-    {
-        currentState = WIFI_STATE_SELECT_NETWORK;
-        selectedNetworkIndex = 0;
-    }
+    // Aunque no haya redes se sale del escaneo: la lista vacia muestra "No networks found"
+    // y OK vuelve a buscar (antes se quedaba escaneando en bucle)
+    currentState = WIFI_STATE_SELECT_NETWORK;
+    selectedNetworkIndex = 0;
 }
 
 void WifiMenu::renderNetworkList()
@@ -190,6 +187,18 @@ void WifiMenu::renderConnectionFailed()
 
 void WifiMenu::handleNetworkSelection()
 {
+    // Sin redes solo OK hace algo: volver a buscar (asi tampoco se lee fuera de la lista vacia)
+    if (networksList.empty())
+    {
+        if (isPressed(BTN_OK))
+        {
+            delay(200); // Debounce
+            currentState = WIFI_STATE_SCANNING;
+            DEV_PRINTLN("Rescanning WiFi networks...");
+        }
+        return;
+    }
+
     int dir = input.realDirection();
 
     if (dir == 1) // Right/Down
@@ -212,8 +221,8 @@ void WifiMenu::handleNetworkSelection()
         selectedSSID = networksList[selectedNetworkIndex];
         enteredPassword = "";
         currentState = WIFI_STATE_ENTER_PASSWORD;
-        Serial.print("Selected network: ");
-        Serial.println(selectedSSID);
+        DEV_PRINT("Selected network: ");
+        DEV_PRINTLN(selectedSSID);
     }
 }
 
@@ -233,17 +242,17 @@ void WifiMenu::handlePasswordEntry()
         if (keyboardPtr->consumeSubmit())
         {
             enteredPassword = keyboardPtr->getWord();
-            Serial.print("Password entered: ");
-            Serial.println(enteredPassword);
+            DEV_PRINT("Password entered: ");
+            DEV_PRINTLN(enteredPassword);
             if (enteredPassword.length() > 0)
             {
                 currentState = WIFI_STATE_CONNECTING;
                 connectStartTime = millis();
-                Serial.print("Connecting to SSID: ");
-                Serial.println(selectedSSID);
-                Serial.print("Using password: ");
-                Serial.println(enteredPassword);
-                Serial.println("Attempting to connect...");
+                DEV_PRINT("Connecting to SSID: ");
+                DEV_PRINTLN(selectedSSID);
+                DEV_PRINT("Using password: ");
+                DEV_PRINTLN(enteredPassword);
+                DEV_PRINTLN("Attempting to connect...");
                 if (wifiServicePtr != nullptr)
                 {
                     wifiServicePtr->connectToNewNetwork(selectedSSID.c_str(), enteredPassword.c_str());
@@ -261,7 +270,7 @@ void WifiMenu::handlePasswordEntry()
             delete keyboardPtr;
             keyboardPtr = nullptr;
         }
-        Serial.println("Back to network selection");
+        DEV_PRINTLN("Back to network selection");
     }
 }
 
@@ -285,12 +294,12 @@ void WifiMenu::update()
         if (isConnected())
         {
             currentState = WIFI_STATE_SELECT_NETWORK;
-            Serial.println("Connected!");
+            DEV_PRINTLN("Connected!");
         }
         else if (millis() - connectStartTime >= CONNECT_TIMEOUT)
         {
             currentState = WIFI_STATE_CONNECTION_FAILED;
-            Serial.println("Connection failed");
+            DEV_PRINTLN("Connection failed");
         }
         break;
     case WIFI_STATE_CONNECTION_FAILED:
@@ -314,10 +323,7 @@ void WifiMenu::render()
     {
     case WIFI_STATE_SCANNING:
     {
-        ClearDisplay();
-        SetMenuFont();
-        DrawText(20, 30, "Scanning...");
-        ActDisplay();
+        DrawBitmap(ScanningBitmap, scanningWidth, scanningHeight);
         break;
     }
 

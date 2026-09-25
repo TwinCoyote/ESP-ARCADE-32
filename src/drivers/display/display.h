@@ -5,8 +5,14 @@ void InitDisplay();
 void ClearDisplay();
 void SetMenuFont();
 void DrawText(int x, int y, const char *text);
+// Dibuja texto centrado horizontalmente en la pantalla (y = linea base)
+void DrawTextCentered(int y, const char *text);
+// Ancho en pixeles de un texto con la fuente actual
+int TextWidth(const char *text);
 // Dibuja un bitmap completo del tamaño indicado y hace display()
 void DrawBitmap(const unsigned char *bitmap, int w, int h);
+// Dibuja un bitmap en (x, y) sin limpiar ni enviar el buffer (para fondos y sprites)
+void DrawImage(int x, int y, int width, int height, const unsigned char *bitmap);
 // Conveniencia: dibuja el logo inicial
 void DrawLogo();
 // Conveniencia: dibuja gráfico de menú principal
@@ -23,7 +29,8 @@ enum FontSize
 {
     FONT_SMALL,
     FONT_MEDIUM,
-    FONT_LARGE
+    FONT_LARGE,
+    FONT_TINY
 };
 
 void SetCustomFont(FontSize size);

@@ -2,6 +2,7 @@
 #include <ArduinoJson.h>
 #include <HTTPClient.h>
 #include <HTTPUpdate.h>
+#include "../../../config/debug_log.h"
 
 OTAService::OTAService(String currentVersion, String user, String repo)
 {
@@ -29,7 +30,7 @@ String OTAService::checkLatestVersion()
         DeserializationError error = deserializeJson(doc, payload);
         if (error)
         {
-            Serial.printf("OTA JSON error: %s\n", error.c_str());
+            DEV_PRINTF("OTA JSON error: %s\n", error.c_str());
             http.end();
             return String();
         }
@@ -41,11 +42,11 @@ String OTAService::checkLatestVersion()
             return latestTag;
         }
 
-        Serial.println("OTA: tag_name no encontrado en GitHub API");
+        DEV_PRINTLN("OTA: tag_name no encontrado en GitHub API");
     }
     else
     {
-        Serial.printf("OTA HTTP error: %d\n", httpCode);
+        DEV_PRINTF("OTA HTTP error: %d\n", httpCode);
     }
 
     http.end();
@@ -55,33 +56,33 @@ String OTAService::checkLatestVersion()
 bool OTAService::performUpdate()
 {
     String latestVersion = checkLatestVersion();
-    // Serial.print("OTA: version actual antes de comparar = ");
-    // Serial.println(_version);
-    // Serial.print("OTA: latestVersion desde GitHub = ");
-    // Serial.println(latestVersion);
+    // DEV_PRINT("OTA: version actual antes de comparar = ");
+    // DEV_PRINTLN(_version);
+    // DEV_PRINT("OTA: latestVersion desde GitHub = ");
+    // DEV_PRINTLN(latestVersion);
 
     if (latestVersion == _version || latestVersion == "")
     {
-        Serial.print("La consola tiene la version mas nueva: ");
-        Serial.println(_version);
+        DEV_PRINT("La consola tiene la version mas nueva: ");
+        DEV_PRINTLN(_version);
         return false;
     }
     else
     {
         String downloadUrl = "https://github.com/" + _user + "/" + _repo + "/releases/download/" + latestVersion + "/firmware.bin";
-        Serial.print("Version actual: ");
-        Serial.println(_version);
-        Serial.println(" ");
-        Serial.print("Version mas nueva: ");
-        Serial.println(latestVersion);
-        Serial.println(" ");
-        Serial.println(downloadUrl);
+        DEV_PRINT("Version actual: ");
+        DEV_PRINTLN(_version);
+        DEV_PRINTLN(" ");
+        DEV_PRINT("Version mas nueva: ");
+        DEV_PRINTLN(latestVersion);
+        DEV_PRINTLN(" ");
+        DEV_PRINTLN(downloadUrl);
 
         WiFiClientSecure client;
         client.setInsecure();
         HTTPClient http;
 
-        Serial.println("¡Descargando nueva versión... No apagues la consola!");
+        DEV_PRINTLN("¡Descargando nueva versión... No apagues la consola!");
         http.setFollowRedirects(HTTPC_FORCE_FOLLOW_REDIRECTS);
         http.begin(client, downloadUrl);
         http.addHeader("User-Agent", "ESP-ARCADE-OTA");
@@ -94,16 +95,16 @@ bool OTAService::performUpdate()
         switch (ret)
         {
         case HTTP_UPDATE_FAILED:
-            Serial.printf("Error de OTA (%d): %s\n", httpUpdate.getLastError(), httpUpdate.getLastErrorString().c_str());
+            DEV_PRINTF("Error de OTA (%d): %s\n", httpUpdate.getLastError(), httpUpdate.getLastErrorString().c_str());
             break;
         case HTTP_UPDATE_NO_UPDATES:
-            Serial.println("El servidor dijo que no hay actualizaciones pendientes.");
+            DEV_PRINTLN("El servidor dijo que no hay actualizaciones pendientes.");
             break;
         case HTTP_UPDATE_OK:
-            Serial.println("¡Actualización exitosa!");
+            DEV_PRINTLN("¡Actualización exitosa!");
             _version = latestVersion;
             saveVersion();
-            Serial.println("NVS: Guardada la versión. Reiniciando sistema...\n");
+            DEV_PRINTLN("NVS: Guardada la versión. Reiniciando sistema...\n");
             ESP.restart();
             break;
         }
@@ -118,16 +119,16 @@ void OTAService::saveVersion()
     Preferences storage;
     if (storage.begin("system", false))
     {
-        // Serial.println("NVS: storage abierto correctamente para escritura");
+        // DEV_PRINTLN("NVS: storage abierto correctamente para escritura");
         storage.putString("fw_version", _version);
         storage.putString("fw_version_backup", _version);
-        // Serial.print("NVS: fw_version guardada como: ");
-        // Serial.println(_version);
+        // DEV_PRINT("NVS: fw_version guardada como: ");
+        // DEV_PRINTLN(_version);
         storage.end();
     }
     else
     {
-        Serial.println("NVS Error: No se pudo abrir el almacenamiento para guardar la versión.");
+        DEV_PRINTLN("NVS Error: No se pudo abrir el almacenamiento para guardar la versión.");
     }
 }
 
@@ -135,34 +136,34 @@ String OTAService::readVersion()
 {
     String ActualVersion = "";
     Preferences storage;
-    // Serial.println("NVS: Intentando leer fw_version desde storage");
+    // DEV_PRINTLN("NVS: Intentando leer fw_version desde storage");
     if (storage.begin("system", true))
     {
-        // Serial.println("NVS: storage abierto correctamente para lectura");
+        // DEV_PRINTLN("NVS: storage abierto correctamente para lectura");
         if (storage.isKey("fw_version"))
         {
             ActualVersion = storage.getString("fw_version", "");
-            Serial.print("NVS: fw_version encontrada: ");
-            Serial.println(ActualVersion);
+            DEV_PRINT("NVS: fw_version encontrada: ");
+            DEV_PRINTLN(ActualVersion);
         }
         else if (storage.isKey("fw_version_backup"))
         {
             ActualVersion = storage.getString("fw_version_backup", "");
-            Serial.print("NVS: fw_version_backup encontrada: ");
-            Serial.println(ActualVersion);
+            DEV_PRINT("NVS: fw_version_backup encontrada: ");
+            DEV_PRINTLN(ActualVersion);
         }
         else
         {
-            Serial.println("NVS: fw_version no existe en storage");
+            DEV_PRINTLN("NVS: fw_version no existe en storage");
         }
         storage.end();
     }
     else
     {
-        Serial.println("NVS Error: No se pudo abrir el almacenamiento para leer la versión.");
+        DEV_PRINTLN("NVS Error: No se pudo abrir el almacenamiento para leer la versión.");
     }
-    Serial.print("NVS: Valor devuelto de readVersion(): ");
-    Serial.println(ActualVersion);
+    DEV_PRINT("NVS: Valor devuelto de readVersion(): ");
+    DEV_PRINTLN(ActualVersion);
     return ActualVersion;
 }
 

@@ -1,13 +1,15 @@
 #include <Arduino.h>
 #include "drivers/input/buttons.h"
 #include "drivers/display/display.h"
+#include "../config/debug_log.h"
+
 const char *options[] = {
     // "Menu"
     "Snake",
     "Pong",
     "Tetris",
     "Config",
-    "Pruebas"};
+    "Flappy Bird"};
 
 int totalOptions = sizeof(options) / sizeof(options[0]);
 int indexMenu = 0;
@@ -32,18 +34,18 @@ bool MenuUpdate()
     // Diagnostic: show pin numbers and raw digitalRead values
     // int rawRight = digitalRead(BTN_RIGHT);
     // int rawLeft = digitalRead(BTN_LEFT);
-    // Serial.print("MENU raw BTN_LEFT=");
-    // Serial.print(leftPressed ? "PRESSED" : "RELEASED");
-    // Serial.print(" (pin=");
-    // Serial.print(BTN_LEFT);
-    // Serial.print(" val=");
-    // Serial.print(rawLeft);
-    // Serial.print(") BTN_RIGHT=");
-    // Serial.print(rightPressed ? "PRESSED" : "RELEASED");
-    // Serial.print(" (pin=");
-    // Serial.print(BTN_RIGHT);
-    // Serial.print(" val=");
-    // Serial.println(rawRight);
+    // DEV_PRINT("MENU raw BTN_LEFT=");
+    // DEV_PRINT(leftPressed ? "PRESSED" : "RELEASED");
+    // DEV_PRINT(" (pin=");
+    // DEV_PRINT(BTN_LEFT);
+    // DEV_PRINT(" val=");
+    // DEV_PRINT(rawLeft);
+    // DEV_PRINT(") BTN_RIGHT=");
+    // DEV_PRINT(rightPressed ? "PRESSED" : "RELEASED");
+    // DEV_PRINT(" (pin=");
+    // DEV_PRINT(BTN_RIGHT);
+    // DEV_PRINT(" val=");
+    // DEV_PRINTLN(rawRight);
 
     if (rightPressed)
     {
@@ -55,7 +57,7 @@ bool MenuUpdate()
                 indexMenu = 0;
             changed = true;
             lastRightMillis = now;
-            Serial.println("BTN_RIGHT pressed");
+            DEV_PRINTLN("BTN_RIGHT pressed");
         }
     }
 
@@ -69,14 +71,14 @@ bool MenuUpdate()
                 indexMenu = totalOptions - 1;
             changed = true;
             lastLeftMillis = now;
-            Serial.println("BTN_LEFT pressed");
+            DEV_PRINTLN("BTN_LEFT pressed");
         }
     }
 
     if (changed)
     {
-        Serial.print("indexMenu=");
-        Serial.println(indexMenu);
+        DEV_PRINT("indexMenu=");
+        DEV_PRINTLN(indexMenu);
     }
 
     return changed;
@@ -95,7 +97,7 @@ bool MenuConfirm()
     {
         lastOkMillis = now;
         lastOkState = true;
-        Serial.println("BTN_OK confirmed");
+        DEV_PRINTLN("BTN_OK confirmed");
         return true;
     }
 
@@ -120,9 +122,10 @@ bool MenuBack()
     {
         lastOkMillis = now;
         lastOkState = true;
-        Serial.println("BTN_BACK IS PRESSED");
+        DEV_PRINTLN("BTN_BACK IS PRESSED");
         return true;
     }
+    lastOkState = false;
 
     return false;
 }
@@ -137,7 +140,7 @@ void MenuRender()
     // ClearDisplay();
     DrawMenu();
     SetMenuFont();
-    DrawText(44, 35, options[indexMenu]);
-    Serial.println(indexMenu);
+    DrawTextCentered(35, options[indexMenu]);
+    DEV_PRINTLN(indexMenu);
     ActDisplay();
 }
