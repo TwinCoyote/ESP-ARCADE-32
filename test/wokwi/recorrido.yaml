@@ -1,0 +1,190 @@
+# Recorrido por todas las pantallas de ESP-ARCADE-32 en Wokwi.
+# Es una prueba de humo: si una pantalla se cuelga, no responde o el ESP32 se reinicia, la prueba falla.
+# De paso guarda una captura de cada pantalla (en CI se suben como artefacto).
+#
+# - Requiere firmware con DEV_MODE=1: los pasos wait-serial esperan los logs de desarrollo.
+# - Botones de diagram.json: btn1=UP, btn2=DOWN, btn3=OK, btn4=BACK, btn5=RIGHT, btn6=LEFT
+# - Las capturas se guardan en screenshots/ (relativo a este archivo; la carpeta debe existir).
+# - Patron de los botones: presionar -> esperar el mensaje del firmware -> soltar. La simulacion se
+#   pausa mientras espera, asi el boton dura justo lo necesario y la prueba no depende de tiempos.
+#
+# Local:  wokwi-cli . --scenario test/wokwi/recorrido.yaml --timeout 90000
+
+name: 'Recorrido por todas las pantallas'
+version: 1
+author: 'TwinCoyote'
+
+steps:
+  # ------------------------------------------------------------------ Arranque
+  - wait-serial: 'InitButtons pins'
+  - delay: 500ms
+  - take-screenshot: { part-id: oled1, save-to: screenshots/01-arranque.png }
+  - wait-serial: '[System] Listo'
+  - delay: 300ms
+  - take-screenshot: { part-id: oled1, save-to: screenshots/02-menu.png }
+
+  # ------------------------------------------------------------------ Snake
+  - set-control: { part-id: btn3, control: pressed, value: 1 }
+  - wait-serial: 'Switching to Snake'
+  - set-control: { part-id: btn3, control: pressed, value: 0 }
+  - delay: 300ms
+  - set-control: { part-id: btn3, control: pressed, value: 1 } # "Presion Start!" (se lee 1 vez cada ~150 ms)
+  - delay: 300ms
+  - set-control: { part-id: btn3, control: pressed, value: 0 }
+  - delay: 1500ms
+  - take-screenshot: { part-id: oled1, save-to: screenshots/03-snake.png }
+  - set-control: { part-id: btn4, control: pressed, value: 1 }
+  - wait-serial: 'BTN_BACK IS PRESSED'
+  - set-control: { part-id: btn4, control: pressed, value: 0 }
+  - delay: 300ms
+
+  # ------------------------------------------------------------------ Pong
+  - set-control: { part-id: btn5, control: pressed, value: 1 }
+  - wait-serial: 'indexMenu=1'
+  - set-control: { part-id: btn5, control: pressed, value: 0 }
+  - set-control: { part-id: btn3, control: pressed, value: 1 }
+  - wait-serial: 'Switching to Pong'
+  - set-control: { part-id: btn3, control: pressed, value: 0 }
+  - delay: 1500ms
+  - take-screenshot: { part-id: oled1, save-to: screenshots/04-pong.png }
+  - set-control: { part-id: btn4, control: pressed, value: 1 }
+  - wait-serial: 'BTN_BACK IS PRESSED'
+  - set-control: { part-id: btn4, control: pressed, value: 0 }
+  - delay: 300ms
+
+  # ------------------------------------------------------------------ Tetris (Proximamente)
+  - set-control: { part-id: btn5, control: pressed, value: 1 }
+  - wait-serial: 'indexMenu=2'
+  - set-control: { part-id: btn5, control: pressed, value: 0 }
+  - set-control: { part-id: btn3, control: pressed, value: 1 }
+  - wait-serial: 'Switching to Tetris'
+  - set-control: { part-id: btn3, control: pressed, value: 0 }
+  - delay: 300ms
+  - take-screenshot: { part-id: oled1, save-to: screenshots/05-tetris.png }
+  - set-control: { part-id: btn4, control: pressed, value: 1 }
+  - wait-serial: 'BTN_BACK IS PRESSED'
+  - set-control: { part-id: btn4, control: pressed, value: 0 }
+  - delay: 300ms
+
+  # ------------------------------------------------------------------ Configuracion
+  - set-control: { part-id: btn5, control: pressed, value: 1 }
+  - wait-serial: 'indexMenu=3'
+  - set-control: { part-id: btn5, control: pressed, value: 0 }
+  - set-control: { part-id: btn3, control: pressed, value: 1 }
+  - wait-serial: 'Switching to Config'
+  - set-control: { part-id: btn3, control: pressed, value: 0 }
+  - delay: 300ms
+  - take-screenshot: { part-id: oled1, save-to: screenshots/06-configuracion.png }
+
+  # Wi-Fi (opcion 0): Wokwi simula la red "Wokwi-GUEST"
+  - set-control: { part-id: btn3, control: pressed, value: 1 }
+  - wait-serial: 'Config -> Wifi selected'
+  - set-control: { part-id: btn3, control: pressed, value: 0 }
+  - wait-serial: 'Scanning WiFi networks...'
+  - delay: 200ms
+  - take-screenshot: { part-id: oled1, save-to: screenshots/07-wifi-buscando.png }
+  - wait-serial: 'Found networks: '
+  - delay: 400ms
+  - take-screenshot: { part-id: oled1, save-to: screenshots/08-wifi-redes.png }
+  - set-control: { part-id: btn4, control: pressed, value: 1 }
+  - wait-serial: 'BTN_BACK IS PRESSED'
+  - set-control: { part-id: btn4, control: pressed, value: 0 }
+  - delay: 300ms
+
+  # Info (opcion 2): dos veces DOWN
+  - set-control: { part-id: btn2, control: pressed, value: 1 }
+  - delay: 150ms
+  - set-control: { part-id: btn2, control: pressed, value: 0 }
+  - delay: 250ms
+  - set-control: { part-id: btn2, control: pressed, value: 1 }
+  - delay: 150ms
+  - set-control: { part-id: btn2, control: pressed, value: 0 }
+  - delay: 250ms
+  - set-control: { part-id: btn3, control: pressed, value: 1 }
+  - wait-serial: 'Config -> Info selected'
+  - set-control: { part-id: btn3, control: pressed, value: 0 }
+  - delay: 600ms
+  - take-screenshot: { part-id: oled1, save-to: screenshots/09-info-consola.png }
+  - set-control: { part-id: btn5, control: pressed, value: 1 }
+  - delay: 60ms
+  - set-control: { part-id: btn5, control: pressed, value: 0 }
+  - delay: 600ms
+  - take-screenshot: { part-id: oled1, save-to: screenshots/10-info-red.png }
+  - set-control: { part-id: btn5, control: pressed, value: 1 }
+  - delay: 60ms
+  - set-control: { part-id: btn5, control: pressed, value: 0 }
+  - delay: 600ms
+  - take-screenshot: { part-id: oled1, save-to: screenshots/11-info-creditos.png }
+
+  # Easter egg: codigo Konami (arriba arriba abajo abajo izquierda derecha izquierda derecha B A)
+  - set-control: { part-id: btn1, control: pressed, value: 1 }
+  - delay: 60ms
+  - set-control: { part-id: btn1, control: pressed, value: 0 }
+  - delay: 90ms
+  - set-control: { part-id: btn1, control: pressed, value: 1 }
+  - delay: 60ms
+  - set-control: { part-id: btn1, control: pressed, value: 0 }
+  - delay: 90ms
+  - set-control: { part-id: btn2, control: pressed, value: 1 }
+  - delay: 60ms
+  - set-control: { part-id: btn2, control: pressed, value: 0 }
+  - delay: 90ms
+  - set-control: { part-id: btn2, control: pressed, value: 1 }
+  - delay: 60ms
+  - set-control: { part-id: btn2, control: pressed, value: 0 }
+  - delay: 90ms
+  - set-control: { part-id: btn6, control: pressed, value: 1 }
+  - delay: 60ms
+  - set-control: { part-id: btn6, control: pressed, value: 0 }
+  - delay: 90ms
+  - set-control: { part-id: btn5, control: pressed, value: 1 }
+  - delay: 60ms
+  - set-control: { part-id: btn5, control: pressed, value: 0 }
+  - delay: 90ms
+  - set-control: { part-id: btn6, control: pressed, value: 1 }
+  - delay: 60ms
+  - set-control: { part-id: btn6, control: pressed, value: 0 }
+  - delay: 90ms
+  - set-control: { part-id: btn5, control: pressed, value: 1 }
+  - delay: 60ms
+  - set-control: { part-id: btn5, control: pressed, value: 0 }
+  - delay: 90ms
+  - set-control: { part-id: btn4, control: pressed, value: 1 } # B
+  - delay: 60ms
+  - set-control: { part-id: btn4, control: pressed, value: 0 }
+  - delay: 90ms
+  - set-control: { part-id: btn3, control: pressed, value: 1 } # A
+  - wait-serial: '[Info] Easter egg desbloqueado'
+  - set-control: { part-id: btn3, control: pressed, value: 0 }
+  - delay: 1500ms
+  - take-screenshot: { part-id: oled1, save-to: screenshots/12-easter-egg.png }
+
+  # BACK: easter egg -> Info -> Configuracion -> menu
+  - set-control: { part-id: btn4, control: pressed, value: 1 }
+  - delay: 60ms
+  - set-control: { part-id: btn4, control: pressed, value: 0 }
+  - delay: 300ms
+  - set-control: { part-id: btn4, control: pressed, value: 1 }
+  - delay: 60ms
+  - set-control: { part-id: btn4, control: pressed, value: 0 }
+  - delay: 300ms
+  - set-control: { part-id: btn4, control: pressed, value: 1 }
+  - wait-serial: 'BTN_BACK IS PRESSED'
+  - set-control: { part-id: btn4, control: pressed, value: 0 }
+  - delay: 300ms
+
+  # ------------------------------------------------------------------ Flappy Bird
+  - set-control: { part-id: btn5, control: pressed, value: 1 }
+  - wait-serial: 'indexMenu=4'
+  - set-control: { part-id: btn5, control: pressed, value: 0 }
+  - set-control: { part-id: btn3, control: pressed, value: 1 }
+  - wait-serial: 'Switching to Flappy Bird'
+  - set-control: { part-id: btn3, control: pressed, value: 0 }
+  - wait-serial: 'Game Over'
+  - delay: 300ms
+  - take-screenshot: { part-id: oled1, save-to: screenshots/13-flappy-game-over.png }
+  - set-control: { part-id: btn4, control: pressed, value: 1 }
+  - wait-serial: 'BTN_BACK IS PRESSED'
+  - set-control: { part-id: btn4, control: pressed, value: 0 }
+  - delay: 300ms
+  - take-screenshot: { part-id: oled1, save-to: screenshots/14-menu-final.png }

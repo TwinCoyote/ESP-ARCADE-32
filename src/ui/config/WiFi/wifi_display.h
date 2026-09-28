@@ -29,6 +29,7 @@ private:
     WiFiService *wifiServicePtr;
     unsigned long lastScanTime;
     unsigned long connectStartTime;
+    unsigned long lastMoveMs;
     const unsigned long SCAN_INTERVAL = 10000;   // Rescan every 10 seconds
     const unsigned long CONNECT_TIMEOUT = 10000; // Connection timeout in ms
 

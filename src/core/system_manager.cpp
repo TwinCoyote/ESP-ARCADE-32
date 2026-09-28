@@ -11,6 +11,7 @@
 #include "../ui/config/update/update.h"
 #include "../ui/config/info/info.h"
 #include "../config/debug_log.h"
+#include "../assets/images/tetris_soon.h"
 
 bool primeraVez = true;
 static WiFiService wifiService("", "");
@@ -62,6 +63,7 @@ void SystemManager::begin()
     pinMode(2, OUTPUT);
 
     wifiService.begin();
+    DEV_PRINTLN("[System] Listo"); // marca de fin de arranque (la usan las pruebas de Wokwi)
 }
 
 void SystemManager::update()
@@ -101,6 +103,8 @@ void SystemManager::update()
             case 2:
                 currentState = STATE_TETRIS;
                 DEV_PRINTLN("Switching to Tetris");
+                // Tetris todavia no existe: se muestra "Proximamente" hasta presionar BACK
+                DrawBitmap(TetrisSoonBitmap, tetrisSoonWidth, tetrisSoonHeight);
                 break;
             case 3:
                 currentState = STATE_CONFIG;
@@ -227,6 +231,7 @@ void SystemManager::update()
             {
                 currentState = STATE_CONFIG;
                 wifiMenu.reset();
+                break; // sin esto, update() volvia a escanear redes antes de regresar
             }
             wifiMenu.update();
             wifiMenu.render();

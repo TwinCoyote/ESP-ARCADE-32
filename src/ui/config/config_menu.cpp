@@ -8,11 +8,21 @@ MenuS::MenuS(const char *opt[], unsigned int len)
     cursor = 0;
     options = opt;
     menuLen = len;
+    lastMoveMs = 0;
 }
 
 void MenuS::handleInput(int dir)
 {
-    if (dir == 1)
+    // Una pulsacion mueve una sola opcion; si se mantiene presionado repite cada 200 ms
+    const unsigned long repeatMs = 200;
+    unsigned long now = millis();
+    if ((dir != 1 && dir != 2) || now - lastMoveMs < repeatMs)
+    {
+        return;
+    }
+    lastMoveMs = now;
+
+    if (dir == 2) // DOWN baja el cursor
     {
         if (cursor == menuLen - 1)
         {
@@ -23,7 +33,7 @@ void MenuS::handleInput(int dir)
             cursor++;
         }
     }
-    if (dir == 2)
+    if (dir == 1) // UP sube el cursor
     {
         if (cursor == 0)
         {

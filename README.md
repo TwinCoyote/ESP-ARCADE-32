@@ -67,7 +67,18 @@ Para usar Wokwi, compila primero el entorno `esp32dev`. El firmware y el ELF esp
 .pio/build/esp32dev/firmware.elf
 ```
 
-El escenario incluido, `Menu Games Navigation`, está definido en [wokwi.toml](wokwi.toml).
+### Pruebas automáticas en Wokwi
+
+El escenario [test/wokwi/recorrido.yaml](test/wokwi/recorrido.yaml) recorre todas las pantallas (los juegos, Configuración, Wi-Fi e Info) presionando los botones simulados. Cada paso espera el mensaje del firmware por Serial, así que la prueba falla si una pantalla se cuelga, no responde o el ESP32 se reinicia. De paso guarda una captura de cada pantalla en `test/wokwi/screenshots/`.
+
+Para correrlo localmente (requiere `WOKWI_CLI_TOKEN` y firmware con `DEV_MODE=1`):
+
+```bash
+pio run -e esp32dev
+wokwi-cli . --scenario test/wokwi/recorrido.yaml --timeout 90000
+```
+
+En GitHub Actions el flujo es: compilar ambos entornos → probar en Wokwi (sube las capturas y el log serial como artefacto `wokwi-pantallas`) → publicar el release si el tag empieza con `v` y todo lo anterior pasó.
 
 ## Controles y pantalla
 

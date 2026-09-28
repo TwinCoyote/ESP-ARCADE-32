@@ -10,6 +10,7 @@ private:
     const char **options;
     unsigned int cursor;
     unsigned int menuLen;
+    unsigned long lastMoveMs;
 
 public:
     MenuS(const char *opt[], unsigned int len);

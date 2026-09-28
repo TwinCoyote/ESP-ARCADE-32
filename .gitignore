@@ -4,3 +4,8 @@
 .vscode/launch.json
 .vscode/ipch
 Project_structure.txt
+
+# Salidas de las pruebas de Wokwi
+test/wokwi/screenshots/*
+!test/wokwi/screenshots/.gitkeep
+wokwi-serial.log

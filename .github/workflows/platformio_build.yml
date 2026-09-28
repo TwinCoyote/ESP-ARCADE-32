@@ -6,17 +6,28 @@ on:
       - main
     tags:
       - "v*"
-
   pull_request:
     branches:
       - main
+  workflow_dispatch:
+
+# Si llega un push nuevo a la misma rama se cancela la corrida anterior (ahorra minutos de Wokwi)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
-  build-and-test:
+  build:
+    name: Compilar (${{ matrix.env }})
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: write
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        env: [esp32dev, esp32-s3-devkitc-1]
 
     steps:
       - name: Checkout del código
@@ -27,42 +38,118 @@ jobs:
         with:
           python-version: "3.x"
 
+      - name: Cache de PlatformIO
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.platformio/.cache
+            ~/.platformio/packages
+            ~/.platformio/platforms
+          key: pio-${{ runner.os }}-${{ matrix.env }}-${{ hashFiles('platformio.ini') }}
+          restore-keys: |
+            pio-${{ runner.os }}-${{ matrix.env }}-
+
       - name: Instalar PlatformIO
         run: |
           python -m pip install --upgrade pip
           pip install -U platformio
 
-      - name: Compilar Proyecto para ESP32
-        run: pio run -e esp32dev
+      - name: Compilar firmware
+        run: |
+          set -o pipefail
+          pio run -e ${{ matrix.env }} | tee build.log
+          {
+            echo "### Memoria (${{ matrix.env }})"
+            echo '```'
+            grep -E "^(RAM|Flash):" build.log
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Guardar firmware
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-${{ matrix.env }}
+          path: |
+            .pio/build/${{ matrix.env }}/firmware.bin
+            .pio/build/${{ matrix.env }}/firmware.elf
+          include-hidden-files: true # la ruta esta dentro de .pio/
+          retention-days: 7
+
+  simulate:
+    name: Pruebas en Wokwi
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      WOKWI_CLI_TOKEN: ${{ secrets.WOKWI_CLI_TOKEN }}
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Descargar firmware (esp32dev)
+        uses: actions/download-artifact@v4
+        with:
+          name: firmware-esp32dev
+          path: .pio/build/esp32dev
 
       - name: Instalar Wokwi CLI
         run: curl -L https://wokwi.com/ci/install.sh | sh
 
-      - name: Validar Diagrama de Wokwi
+      - name: Validar diagrama de Wokwi
         run: wokwi-cli lint
 
-      - name: Ejecutar simulación en Wokwi
+      # Recorre todas las pantallas (juegos, configuracion, WiFi, Info y el easter egg).
+      # Falla si un paso no ocurre a tiempo, si el ESP32 entra en panic o si se reinicia.
+      - name: Recorrido por todas las pantallas
+        if: env.WOKWI_CLI_TOKEN != ''
         run: |
-          wokwi-cli . --timeout 8000 --timeout-exit-code 0 \
-            --screenshot-part oled1 \
-            --screenshot-time 6000 \
-            --screenshot-file menu_games_navigation.png
-        env:
-          WOKWI_CLI_TOKEN: ${{ secrets.WOKWI_CLI_TOKEN }}
+          mkdir -p test/wokwi/screenshots
+          wokwi-cli . \
+            --scenario test/wokwi/recorrido.yaml \
+            --timeout 90000 \
+            --fail-text "Guru Meditation" \
+            --serial-log-file wokwi-serial.log
 
-      - name: Descargar Screenshot del Simulador
+      - name: Resumen de la prueba
+        if: always() && env.WOKWI_CLI_TOKEN != ''
+        run: |
+          echo "### Pantallas capturadas en Wokwi" >> "$GITHUB_STEP_SUMMARY"
+          ls test/wokwi/screenshots/*.png 2>/dev/null | xargs -n1 basename | sed 's/^/- /' >> "$GITHUB_STEP_SUMMARY" || true
+          echo "Descarga el artefacto **wokwi-pantallas** para verlas junto con el log serial." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Subir capturas y log serial
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: screenshot-pantalla
-          path: menu_games_navigation.png
+          name: wokwi-pantallas
+          path: |
+            test/wokwi/screenshots/*.png
+            wokwi-serial.log
+          if-no-files-found: ignore
 
-      - name: Crear Release y subir Binario
-        if: startsWith(github.ref, 'refs/tags/v')
+  release:
+    name: Publicar release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [build, simulate]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Descargar firmware (esp32dev)
+        uses: actions/download-artifact@v4
+        with:
+          name: firmware-esp32dev
+          path: .pio/build/esp32dev
+
+      - name: Crear release y subir binario
         uses: softprops/action-gh-release@v2
         with:
           files: |
             .pio/build/esp32dev/firmware.bin
             diagram.json
           generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

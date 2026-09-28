@@ -9,6 +9,7 @@ WifiMenu::WifiMenu()
       currentState(WIFI_STATE_SCANNING),
       lastScanTime(0),
       connectStartTime(0),
+      lastMoveMs(0),
       keyboardPtr(nullptr),
       wifiServicePtr(nullptr)
 {
@@ -200,19 +201,25 @@ void WifiMenu::handleNetworkSelection()
     }
 
     int dir = input.realDirection();
+    unsigned long now = millis();
 
-    if (dir == 1) // Right/Down
+    // Una pulsacion mueve una sola red; si se mantiene presionado repite cada 200 ms
+    if ((dir == 1 || dir == 2) && now - lastMoveMs >= 200)
     {
-        selectedNetworkIndex++;
-        if (selectedNetworkIndex >= networksList.size())
-            selectedNetworkIndex = 0;
-    }
-    else if (dir == 2) // Left/Up
-    {
-        if (selectedNetworkIndex == 0)
-            selectedNetworkIndex = networksList.size() - 1;
-        else
-            selectedNetworkIndex--;
+        lastMoveMs = now;
+        if (dir == 2) // DOWN
+        {
+            selectedNetworkIndex++;
+            if (selectedNetworkIndex >= networksList.size())
+                selectedNetworkIndex = 0;
+        }
+        else // UP
+        {
+            if (selectedNetworkIndex == 0)
+                selectedNetworkIndex = networksList.size() - 1;
+            else
+                selectedNetworkIndex--;
+        }
     }
 
     if (isPressed(BTN_OK))

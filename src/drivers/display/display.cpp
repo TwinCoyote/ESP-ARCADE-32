@@ -114,13 +114,14 @@ void DrawLogo()
 }
 
 /**
- * @brief Funcion que imprime el background de fondo
+ * @brief Funcion que dibuja el fondo del menu en el buffer, sin enviarlo.
+ * Quien la llama agrega el texto encima y despues hace ActDisplay(): si se enviara aqui,
+ * la pantalla mostraria un instante el fondo sin texto (parpadeo al cambiar de opcion).
  */
 void DrawMenu()
 {
-    // display.clearBuffer();
-    DrawBitmap(menu_principal, logoWidth, logoHeight);
-    // display.sendBuffer();
+    display.clearBuffer();
+    display.drawXBMP(0, 0, logoWidth, logoHeight, menu_principal);
 }
 
 /**

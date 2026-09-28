@@ -15,7 +15,7 @@ void DrawBitmap(const unsigned char *bitmap, int w, int h);
 void DrawImage(int x, int y, int width, int height, const unsigned char *bitmap);
 // Conveniencia: dibuja el logo inicial
 void DrawLogo();
-// Conveniencia: dibuja gráfico de menú principal
+// Dibuja el fondo del menu principal en el buffer (no lo envia; despues va ActDisplay())
 void DrawMenu();
 // Funcion para esperar con millis
 bool wait(unsigned long durationMs);
