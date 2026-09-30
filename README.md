@@ -4,6 +4,19 @@ Firmware modular para una consola portátil basada en ESP32, con pantalla OLED d
 
 El proyecto está organizado por capas para que los juegos, la interfaz y los servicios del sistema puedan evolucionar sin quedar acoplados al hardware.
 
+<p align="center">
+  <img src="docs/images/console-tetris-closeup.jpg" alt="Tetris corriendo en la pantalla OLED del prototipo" width="720">
+</p>
+
+## Prototipo
+
+Prototipo actual: ESP32 DevKit, OLED SH1106 de 1.3 pulgadas y los botones montados en una mini protoboard.
+
+<p align="center">
+  <img src="docs/images/console-prototype-menu.jpg" alt="Prototipo de ESP-ARCADE-32 mostrando el menú principal" width="400">
+  <img src="docs/images/console-prototype-tetris.jpg" alt="Prototipo de ESP-ARCADE-32 jugando Tetris" width="400">
+</p>
+
 ## Estado del proyecto
 
 | Área                                     | Estado                       |
@@ -17,7 +30,7 @@ El proyecto está organizado por capas para que los juegos, la interfaz y los se
 | OTA                                      | Integración en progreso      |
 | Tetris                                   | Primera versión              |
 | Pantalla de información                  | Implementado                 |
-| PCB ESP-ARCADE Rev B                     | Diseño y routing en progreso |
+| PCB ESP-ARCADE Rev B                     | Routing terminado            |
 
 > La aplicación que compila actualmente usa el pinout de ESP32 DevKit/Wokwi. El pinout de la PCB Rev B está documentado por separado y requiere una adaptación antes de usar el firmware en esa placa.
 
@@ -228,14 +241,19 @@ Pinout previsto para la PCB:
 ### Documentación visual
 
 <p align="center">
-  <img src="docs/images/pcb-3d-overview.png" alt="Vista 3D frontal y trasera de la PCB ESP-ARCADE" width="720">
+  <img src="docs/images/pcb-rev-b-3d-perspective.png" alt="Vista 3D en perspectiva de la PCB ESP-ARCADE Rev B ruteada" width="720">
+</p>
+
+<p align="center">
+  <img src="docs/images/pcb-rev-b-top-3d.png" alt="Vista 3D frontal de la PCB: OLED, D-pad, botones y conectores de expansión" width="340">
+  <img src="docs/images/pcb-rev-b-bottom-3d.png" alt="Vista 3D trasera de la PCB: ESP32-S3, USB-C, cargador, regulador y audio" width="340">
 </p>
 
 <p align="center">
   <img src="docs/images/pcb-schematic.png" alt="Esquemático de la PCB ESP-ARCADE" width="720">
 </p>
 
-Estado de la placa: esquemático completado con ERC sin errores; colocación y stackup de cuatro capas definidos; routing todavía en progreso.
+Estado de la placa: esquemático completado con ERC sin errores; stackup de cuatro capas; routing terminado (DRC sin conexiones pendientes, solo avisos de serigrafía) y archivos de fabricación (gerbers, BOM y CPL) generados. Falta fabricarla y validarla.
 
 ## Dependencias
 
@@ -262,5 +280,5 @@ Para añadir un juego:
 - Tetris: caída instantánea (hard drop), récord guardado en NVS y pantalla de Game Over propia.
 - Migrar la configuración de pines a la PCB Rev B.
 - Añadir audio I2S y lectura del nivel de batería.
-- Finalizar el routing y validar la PCB fabricada.
+- Fabricar y validar la PCB Rev B.
 - Ampliar las pruebas automatizadas de menú y navegación.
