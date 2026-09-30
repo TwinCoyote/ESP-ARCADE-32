@@ -66,6 +66,9 @@ void draw_scoreboard_modal(int user_points, int ai_points)
     // Set larger font for visibility
     SetCustomFont(FONT_MEDIUM);
 
+    // Clear the court background behind the score so the text stays readable
+    ClearBox(box_x, box_y, box_width, box_height);
+
     // Draw the score in the center
     DrawText(box_x + 5, box_y + 16, score_str);
 }

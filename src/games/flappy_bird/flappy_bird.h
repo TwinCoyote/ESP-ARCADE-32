@@ -11,6 +11,7 @@ private:
     int y = 0;
     float vel_y = 0;
     float gravity = 0;
+    bool ok_WasPress = false;
 
 public:
     // EL CONSTRUCTOR: Sin void, y recibe las coordenadas iniciales

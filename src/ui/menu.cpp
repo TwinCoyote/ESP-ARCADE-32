@@ -125,7 +125,10 @@ bool MenuBack()
         DEV_PRINTLN("BTN_BACK IS PRESSED");
         return true;
     }
-    lastOkState = false;
+    if (!current)
+    {
+        lastOkState = false;
+    }
 
     return false;
 }

@@ -245,12 +245,19 @@ void WifiMenu::handlePasswordEntry()
 
     if (okDown && keyboardPtr != nullptr)
     {
+        String SecretPass = "";
         keyboardPtr->handleInput(5);
         if (keyboardPtr->consumeSubmit())
         {
             enteredPassword = keyboardPtr->getWord();
             DEV_PRINT("Password entered: ");
-            DEV_PRINTLN(enteredPassword);
+            // String SecretPass = "";
+            for (size_t i = 0; i < enteredPassword.length(); i++)
+            {
+                SecretPass += "*";
+            }
+            DEV_PRINTLN(SecretPass);
+
             if (enteredPassword.length() > 0)
             {
                 currentState = WIFI_STATE_CONNECTING;
@@ -258,7 +265,13 @@ void WifiMenu::handlePasswordEntry()
                 DEV_PRINT("Connecting to SSID: ");
                 DEV_PRINTLN(selectedSSID);
                 DEV_PRINT("Using password: ");
-                DEV_PRINTLN(enteredPassword);
+                // DEV_PRINTLN(enteredPassword);
+                
+                for (size_t i = 0; i < enteredPassword.length(); i++)
+                {
+                    SecretPass += "*";
+                }
+                DEV_PRINTLN(SecretPass);
                 DEV_PRINTLN("Attempting to connect...");
                 if (wifiServicePtr != nullptr)
                 {

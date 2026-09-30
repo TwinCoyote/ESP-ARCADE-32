@@ -15,7 +15,7 @@ El proyecto está organizado por capas para que los juegos, la interfaz y los se
 | Configuración Wi-Fi y almacenamiento NVS | Implementado                 |
 | Teclado virtual                          | Implementado                 |
 | OTA                                      | Integración en progreso      |
-| Tetris                                   | Placeholder                  |
+| Tetris                                   | Primera versión              |
 | Pantalla de información                  | Implementado                 |
 | PCB ESP-ARCADE Rev B                     | Diseño y routing en progreso |
 
@@ -26,7 +26,7 @@ El proyecto está organizado por capas para que los juegos, la interfaz y los se
 - Arquitectura por capas: drivers, servicios, core, UI y juegos.
 - Compatible con controladores OLED SH1106 y SSD1306 mediante U8g2.
 - Menú navegable con seis botones: OK, BACK, UP, DOWN, LEFT y RIGHT.
-- Snake, Pong y Flappy Bird incluidos.
+- Snake, Pong, Tetris y Flappy Bird incluidos.
 - Wi-Fi con escaneo de redes, conexión y credenciales persistentes en NVS.
 - Teclado virtual para introducir contraseñas desde la consola.
 - Servicios de red ejecutados en una tarea FreeRTOS independiente.
@@ -114,7 +114,7 @@ src/
 ├── core/                    Máquina de estados del sistema
 ├── core0/services/          Wi-Fi y OTA
 ├── drivers/                 Display, botones y tiempo
-├── games/                   Snake, Pong y Flappy Bird
+├── games/                   Snake, Pong, Tetris y Flappy Bird
 ├── ui/                      Menú, teclado y configuración
 └── assets/                  Bitmaps y recursos gráficos
 ```
@@ -125,7 +125,7 @@ src/
 MENU
 ├── SNAKE
 ├── PONG
-├── TETRIS (placeholder)
+├── TETRIS
 ├── CONFIG
 │   ├── WIFI_CONFIG
 │   ├── UPDATE_CONFIG
@@ -148,6 +148,14 @@ MENU
 
 - Partida jugador contra IA.
 - Física básica de la pelota y rebotes en los límites.
+
+### Tetris
+
+- Pozo de 10 x 20 celdas con las siete piezas, bolsa aleatoria de 7 y giros con patada contra paredes.
+- Panel con puntaje, líneas y nivel; recuadros NEXT y HOLD; sombra de la pieza.
+- Puntaje 100/300/500/800 por 1-4 líneas (multiplicado por el nivel) y +1 por fila con caída rápida.
+- El nivel sube cada 10 líneas y acelera la caída.
+- Controles: `LEFT`/`RIGHT` mover, `UP` girar, `DOWN` caída rápida, `OK` guardar en HOLD, `BACK` volver al menú.
 - Pantallas de victoria y derrota con bitmaps.
 
 ### Flappy Bird
@@ -251,7 +259,7 @@ Para añadir un juego:
 ## Roadmap
 
 - Completar el flujo de actualización OTA desde la UI.
-- Implementar Tetris.
+- Tetris: caída instantánea (hard drop), récord guardado en NVS y pantalla de Game Over propia.
 - Migrar la configuración de pines a la PCB Rev B.
 - Añadir audio I2S y lectura del nivel de batería.
 - Finalizar el routing y validar la PCB fabricada.

@@ -6,12 +6,12 @@
 #include "../games/snake/Snake.h"
 #include "../games/pong/pong.h"
 #include "../games/flappy_bird/flappy_bird.h"
+#include "../games/tetris/tetris.h"
 #include "../ui/config/config_menu.h"
 #include "../ui/config/WiFi/wifi_display.h"
 #include "../ui/config/update/update.h"
 #include "../ui/config/info/info.h"
 #include "../config/debug_log.h"
-#include "../assets/images/tetris_soon.h"
 
 bool primeraVez = true;
 static WiFiService wifiService("", "");
@@ -103,8 +103,7 @@ void SystemManager::update()
             case 2:
                 currentState = STATE_TETRIS;
                 DEV_PRINTLN("Switching to Tetris");
-                // Tetris todavia no existe: se muestra "Proximamente" hasta presionar BACK
-                DrawBitmap(TetrisSoonBitmap, tetrisSoonWidth, tetrisSoonHeight);
+                tetris::reset();
                 break;
             case 3:
                 currentState = STATE_CONFIG;
@@ -131,6 +130,7 @@ void SystemManager::update()
             {
                 currentState = STATE_MENU;
                 primeraVez = true;
+                break;
             }
             // digitalWrite(2, HIGH);
             snake_game();
@@ -143,6 +143,7 @@ void SystemManager::update()
             {
                 currentState = STATE_MENU;
                 primeraVez = true;
+                break;
             }
             // digitalWrite(2, HIGH);
             pong::game_pong();
@@ -155,8 +156,10 @@ void SystemManager::update()
             {
                 currentState = STATE_MENU;
                 primeraVez = true;
+                break;
             }
             // digitalWrite(2, HIGH);
+            tetris::game_tetris();
             break;
         }
 
@@ -166,6 +169,7 @@ void SystemManager::update()
             {
                 currentState = STATE_MENU;
                 primeraVez = true;
+                break;
             }
             static const char *opcionesConfig[] = {"Wifi", "Update", "Info"};
             static const unsigned int totalOpciones = sizeof(opcionesConfig) / sizeof(opcionesConfig[0]);
@@ -185,6 +189,7 @@ void SystemManager::update()
                     {
                         currentState = STATE_MENU;
                         primeraVez = true;
+                        break;
                     }
                     DEV_PRINTLN("Config -> Wifi selected");
                     currentState = STATE_WIFI_CONFIG;
@@ -195,11 +200,10 @@ void SystemManager::update()
                     {
                         currentState = STATE_MENU;
                         primeraVez = true;
+                        break;
                     }
                     DEV_PRINTLN("Config -> Update selected");
                     currentState = STATE_UPDATE_CONFIG;
-
-                    // TODO: make the display for update firmware and the functions
                     break;
                 case 2:
                     DEV_PRINTLN("Config -> Info selected");
@@ -219,6 +223,7 @@ void SystemManager::update()
             {
                 currentState = STATE_MENU;
                 primeraVez = true;
+                break;
             }
             // digitalWrite(2, HIGH);
             flappy_bird();
@@ -231,7 +236,7 @@ void SystemManager::update()
             {
                 currentState = STATE_CONFIG;
                 wifiMenu.reset();
-                break; // sin esto, update() volvia a escanear redes antes de regresar
+                break; 
             }
             wifiMenu.update();
             wifiMenu.render();

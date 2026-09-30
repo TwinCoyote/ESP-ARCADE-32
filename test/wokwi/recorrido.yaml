@@ -52,7 +52,7 @@ steps:
   - set-control: { part-id: btn4, control: pressed, value: 0 }
   - delay: 300ms
 
-  # ------------------------------------------------------------------ Tetris (Proximamente)
+  # ------------------------------------------------------------------ Tetris
   - set-control: { part-id: btn5, control: pressed, value: 1 }
   - wait-serial: 'indexMenu=2'
   - set-control: { part-id: btn5, control: pressed, value: 0 }
@@ -61,6 +61,14 @@ steps:
   - set-control: { part-id: btn3, control: pressed, value: 0 }
   - delay: 300ms
   - take-screenshot: { part-id: oled1, save-to: screenshots/05-tetris.png }
+  - set-control: { part-id: btn3, control: pressed, value: 1 } # "PULSA OK" inicia la partida
+  - wait-serial: '[Tetris] Nueva partida'
+  - set-control: { part-id: btn3, control: pressed, value: 0 }
+  - set-control: { part-id: btn2, control: pressed, value: 1 } # caida rapida para que se vea la pila
+  - delay: 2500ms
+  - set-control: { part-id: btn2, control: pressed, value: 0 }
+  - delay: 300ms
+  - take-screenshot: { part-id: oled1, save-to: screenshots/05b-tetris-jugando.png }
   - set-control: { part-id: btn4, control: pressed, value: 1 }
   - wait-serial: 'BTN_BACK IS PRESSED'
   - set-control: { part-id: btn4, control: pressed, value: 0 }

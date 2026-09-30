@@ -20,9 +20,17 @@ enum class states
     AGAIN
 };
 
+enum class directions {
+    UP,
+    DOWN,
+    LEFT,
+    RIGHT
+};
+
+extern directions direction;
 extern states ACTUAL_STATE;
 
-extern int direccion;
+// extern int direccion;
 extern unsigned long previousTime;
 extern int largo;
 

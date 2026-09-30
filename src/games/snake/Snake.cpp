@@ -1,6 +1,8 @@
 // #include "input.h"
 #include "Snake.h"
 #include "../../drivers/display/display.h"
+#include "../../assets/images/snake_images/snake_background.h"
+#include "../../assets/images/snake_images/snake_game_over.h"
 
 // #define ANCHO_PANTALLA 128
 // #define ALTO_PANTALLA 64
@@ -13,13 +15,14 @@ extern Input input;
 const unsigned long eventInterval = 1000;
 unsigned long previousTime = 0;
 
-int direccion = 1;
+// int direccion = 1;
+directions direccion = directions::DOWN;
 
 states ACTUAL_STATE = states::INIT;
 
 // int x = 0;   // posición X
 // int y = 0;   // posición Y
-int largo = 20;
+int largo = 3;
 
 int snake_x[LONGITUD_MAXIMA];
 int snake_y[LONGITUD_MAXIMA];
@@ -79,15 +82,30 @@ void check_food()
 
 void direcciones()
 {
-
-    if (direccion == 0)
+    switch (direccion)
+    {
+    case directions::UP:
         snake_y[0] -= len_block;
-    if (direccion == 1)
+        break;
+    case directions::DOWN:
         snake_y[0] += len_block;
-    if (direccion == 2)
+        break;
+    case directions::RIGHT:
         snake_x[0] += len_block;
-    if (direccion == 3)
+        break;
+    case directions::LEFT:
         snake_x[0] -= len_block;
+        break;
+    };
+
+    // if (direccion == 0)
+    //     snake_y[0] -= len_block;
+    // if (direccion == 1)
+    //     snake_y[0] += len_block;
+    // if (direccion == 2)
+    //     snake_x[0] += len_block;
+    // if (direccion == 3)
+    //     snake_x[0] -= len_block;
 }
 
 // void buttons_read() {
@@ -106,27 +124,54 @@ void direcciones()
 
 // }
 
+directions opposite(directions dire)
+{
+    switch(dire){
+        case directions::UP:
+        return directions::DOWN;
+        
+        case directions::DOWN:
+        return directions::UP;
+
+        case directions::LEFT:
+        return directions::RIGHT;
+
+        case directions::RIGHT:
+        return directions::LEFT;
+
+        default:
+        return directions::DOWN;
+    }
+}
+
 void buttons_read()
 {
+
+    directions newDirection = direccion;
+
     int dir = input.realDirection();
-    if (dir == 1)
+    if (dir == 1) // Arriba
     {
-        direccion = 0;
+        newDirection = directions::UP;
     }
-    else if (dir == 2)
+    else if (dir == 2) // Abajo
     {
-        direccion = 1;
+        newDirection = directions::DOWN;
     }
-    else if (dir == 3)
+    else if (dir == 3) // Derecha
     {
-        direccion = 2;
+        newDirection = directions::RIGHT;
     }
-    else if (dir == 4)
+    else if (dir == 4) // Izquierda
     {
-        direccion = 3;
+        newDirection = directions::LEFT;
     }
     else if (dir == 5)
     {
+    }
+    if (newDirection != opposite(direccion))
+    {
+        direccion = newDirection;
     }
 }
 
@@ -214,16 +259,13 @@ void lose_display()
 
     ActDisplay();
     ClearDisplay();
-    SetCustomFont(FONT_MEDIUM);
-    DrawText(4, 30, "Game Over!");
-    SetCustomFont(FONT_SMALL);
-    DrawText(10, 50, "Volver a Jugar?");
+    DrawImage(0, 0, snakeGameOverWidth, snakeGameOverHeight, SnakeGameOverBitmap);
 }
 
 void reset_game()
 {
     largo = 3;
-    direccion = 1;
+    direccion = directions::DOWN;
 
     snake_x[0] = 8;
     snake_y[0] = 8;
@@ -266,7 +308,9 @@ void snake_game()
 
         // display.clearDisplay();
         ClearDisplay();
+        DrawImage(0, 0, snakeBackgroundWidth, snakeBackgroundHeight, SnakeBackgroundBitmap);
         buttons_read();
+        // movement_logic();
         body();
         direcciones();
         space_limits();

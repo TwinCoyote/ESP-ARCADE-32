@@ -21,6 +21,8 @@ void DrawMenu();
 bool wait(unsigned long durationMs);
 void ActDisplay();
 void DrawBox(int x, int y, int l, int w);
+// Borra (pinta en negro) un cuadro del buffer, para despejar el fondo detras de un texto
+void ClearBox(int x, int y, int l, int w);
 
 #define ANCHO_PANTALLA 128
 #define ALTO_PANTALLA 64

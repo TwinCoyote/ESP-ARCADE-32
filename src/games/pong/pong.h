@@ -4,6 +4,12 @@
 #include "../../drivers/input/buttons.h"
 
 // extern Adafruit_SSD1306 display;
+enum class states_pong
+{
+    INIT,
+    START,
+    GAME_OVER,
+};
 extern Input input;
 
 extern int direccion;
@@ -37,5 +43,6 @@ namespace pong
     void ball_limits();
     void caida();
     void game_pong();
+    void end_game(bool);
 }
 #endif

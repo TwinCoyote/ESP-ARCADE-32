@@ -2,10 +2,14 @@
 #include "../../drivers/input/buttons.h"
 #include "../../drivers/display/display.h"
 #include "../../assets/images/pong_images/scoreboard.h"
-// #include "states_displays.h" // Todo: Mejorar por codigo y no por bitmap
+#include "../../assets/images/pong_images/pong_background.h"
+#include "../../assets/images/pong_images/pong_game_over.h"
+// #include "states_pong_displays.h" // Todo: Mejorar por codigo y no por bitmap
 
 namespace pong
 {
+
+    static states_pong STATE = states_pong::INIT;
 
     void ball_init();
     // void ball_start();
@@ -24,7 +28,7 @@ namespace pong
     const int limite_inferior_player = ALTO_PANTALLA - width;
     const int ball_size = 4;
     const int limite_inferior = ALTO_PANTALLA;
-    const int limite_superior_ball = ALTO_PANTALLA + ball_size;
+    const int limite_superior_ball = ALTO_PANTALLA - ball_size;
     const int limite_superior = 0;
 
     int ball_directionX = 1;
@@ -126,7 +130,8 @@ namespace pong
             }
             else if (expectedX < 4)
             {
-                count_user++;
+
+                count_enemy++;
                 ball_attached = true;
                 ball_on_ai = true;
                 user_counter();
@@ -153,7 +158,7 @@ namespace pong
             }
             else if (expectedX > ANCHO_PANTALLA - 4)
             {
-                count_enemy++;
+                count_user++;
                 ball_attached = true;
                 ball_on_ai = false;
                 user_counter();
@@ -224,19 +229,50 @@ namespace pong
 
     void setup_pong()
     {
+        count_user = 0;
+        count_enemy = 0;
+        y = 0;
+        y_AI = len_block;
+        ball_attached = true;
+        ball_on_ai = false;
         ball_init();
+        STATE = states_pong::START;
     }
 
-    void end_game(){
-        if(count_user >= 10){
-            
+    void end_game(bool again)
+    {
+        if (again)
+        {
+            count_enemy = 0;
+            count_user = 0;
+            y = 0;
+            y_AI = len_block;
+            ball_attached = true;
+            ball_on_ai = false;
+            ball_init();
+            STATE = states_pong::START;
         }
+        ClearDisplay();
+        DrawImage(0, 0, pongGameOverWidth, pongGameOverHeight, PongGameOverBitmap);
+        ActDisplay();
     }
 
     void game_pong()
     {
         // display.clearDisplay();
+        if (STATE == states_pong::INIT)
+        {
+            setup_pong();
+        }
+
+        if (STATE == states_pong::GAME_OVER)
+        {
+            end_game(isPressed(BTN_OK));
+            delay(20);
+            return;
+        }
         ClearDisplay();
+        DrawImage(0, 0, pongBackgroundWidth, pongBackgroundHeight, PongBackgroundBitmap);
 
         pong_buttons_read();
         pong_direcciones();
@@ -253,7 +289,10 @@ namespace pong
         {
             move_ball();
         }
-
+        if (count_user >= 10 || count_enemy >= 10)
+        {
+            STATE = states_pong::GAME_OVER;
+        }
         print_ball();
 
         draw_scoreboard_modal(count_user, count_enemy);

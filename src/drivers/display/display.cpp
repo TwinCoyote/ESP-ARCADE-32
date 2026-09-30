@@ -145,6 +145,21 @@ void DrawBox(int x, int y, int l, int w)
 }
 
 /**
+ * @brief Funcion que borra (pinta en negro) un cuadro del buffer.
+ * Sirve para despejar el fondo detras de un texto y que se lea bien.
+ * @param x Cordenada en X
+ * @param y Cordenadas en Y
+ * @param l valor entero de la longiutd
+ * @param w Valor entero de el ancho
+ */
+void ClearBox(int x, int y, int l, int w)
+{
+    display.setDrawColor(0);
+    display.drawBox(x, y, l, w);
+    display.setDrawColor(1);
+}
+
+/**
  * @brief Funcion que permite esperar un tiempo usando millis()
  */
 bool wait(unsigned long durationMs)

@@ -35,11 +35,13 @@ void Pajaro::print()
 
 void Pajaro::jump()
 {
-    int dir = input.realDirection();
-    if (dir == 5)
+    bool okPress = input.realDirection() == 5;
+    // int dir = input.realDirection();
+    if (okPress && !ok_WasPress)
     {
         vel_y = -3.5;
     }
+    ok_WasPress = okPress;
 }
 
 int Pajaro::getX()
