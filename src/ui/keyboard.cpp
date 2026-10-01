@@ -10,7 +10,7 @@ VirtualKeyboard::VirtualKeyboard(int x, int y)
     row = 2;
     column = 6; // start on '/' key for mode toggle
     current_text = "";
-    EntireWord = "";
+    
     submitPressed = false;
 }
 
@@ -108,7 +108,6 @@ bool VirtualKeyboard::consumeSubmit()
     if (submitPressed)
     {
         submitPressed = false;
-        EntireWord = current_text;
         return true;
     }
     return false;
@@ -120,7 +119,7 @@ void VirtualKeyboard::render()
     const int cellHeight = 10;
     const int hSpacing = 12;
     const int vSpacing = 14;
-    const int labelY = y - 5; // 12
+    
 
     SetMenuFont();
 

@@ -8,7 +8,7 @@
 # - Patron de los botones: presionar -> esperar el mensaje del firmware -> soltar. La simulacion se
 #   pausa mientras espera, asi el boton dura justo lo necesario y la prueba no depende de tiempos.
 #
-# Local:  wokwi-cli . --scenario test/wokwi/recorrido.yaml --timeout 90000
+# Local:  wokwi-cli . --scenario test/wokwi/recorrido.yaml --timeout 150000
 
 name: 'Recorrido por todas las pantallas'
 version: 1
@@ -196,3 +196,19 @@ steps:
   - set-control: { part-id: btn4, control: pressed, value: 0 }
   - delay: 300ms
   - take-screenshot: { part-id: oled1, save-to: screenshots/14-menu-final.png }
+
+  # ------------------------------------------------------------------ Protector de pantalla
+  # Con 30 s sin botones arranca solo (la primera escena es la mascota saliendo del huevo).
+  # OK lo quita y no debe hacer nada mas: el menu esta en Flappy Bird; si esa pulsacion abriera
+  # el juego, RIGHT ya no moveria el menu y 'indexMenu=0' nunca llegaria.
+  - wait-serial: '[Protector] Escena: Mascota'
+  - delay: 4500ms
+  - take-screenshot: { part-id: oled1, save-to: screenshots/15-protector-mascota.png }
+  - set-control: { part-id: btn3, control: pressed, value: 1 }
+  - wait-serial: '[Protector] Fin'
+  - set-control: { part-id: btn3, control: pressed, value: 0 }
+  - delay: 300ms
+  - take-screenshot: { part-id: oled1, save-to: screenshots/16-menu-tras-protector.png }
+  - set-control: { part-id: btn5, control: pressed, value: 1 }
+  - wait-serial: 'indexMenu=0'
+  - set-control: { part-id: btn5, control: pressed, value: 0 }

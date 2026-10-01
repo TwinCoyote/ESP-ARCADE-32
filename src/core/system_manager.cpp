@@ -12,44 +12,92 @@
 #include "../ui/config/update/update.h"
 #include "../ui/config/info/info.h"
 #include "../config/debug_log.h"
+#include "../ui/screensaver/screensaver.h"
 
-bool primeraVez = true;
+static bool primeraVez = true;
 static WiFiService wifiService("", "");
 static WifiMenu wifiMenu;
 static InfoMenu infoMenu;
 
+// Protector de pantalla: arranca despues de este tiempo sin tocar ningun boton
+static const unsigned long TIEMPO_INACTIVIDAD = 30000UL;
+static unsigned long ultimaActividad = 0;
+static unsigned long ultimaVuelta = 0;
+static bool animacionActiva = false;
+static bool esperandoSoltar = false;
+
+/**
+ * @brief Protector de pantalla: tras TIEMPO_INACTIVIDAD sin botones arranca las animaciones
+ * (mascota, ojos y video musical) y con cualquier boton se regresa a donde estaba.
+ * @return true mientras el protector tenga la pantalla: en esa vuelta update() no hace nada mas
+ */
+bool SystemManager::animation()
+{
+    unsigned long ahora = ::millis();
+
+    // Si update() estuvo bloqueado un rato (Flappy Bird corre su propio bucle, el escaneo de WiFi
+    // espera a que termine...) ese tiempo no fue inactividad: alguien estaba jugando o esperando
+    if (ahora - ultimaVuelta > 1000UL)
+    {
+        ultimaActividad = ahora;
+    }
+    ultimaVuelta = ahora;
+
+    input.updateActivity();
+    bool actividad = input.consumeButtonActivity();
+    if (actividad)
+    {
+        ultimaActividad = ahora;
+    }
+
+    if (animacionActiva)
+    {
+        if (!actividad)
+        {
+            screensaver::update();
+            return true;
+        }
+        // Un boton despierta la consola. Esa pulsacion solo despierta: no debe hacer nada en la
+        // pantalla de abajo (por ejemplo, que OK no abra el juego del menu)
+        animacionActiva = false;
+        esperandoSoltar = true;
+        DEV_PRINTLN("[Protector] Fin");
+        SetMenuFont();
+        if (currentState == STATE_MENU)
+        {
+            MenuRender();
+        }
+        else
+        {
+            ClearDisplay(); // El juego o la pantalla de configuracion se vuelve a dibujar sola
+            ActDisplay();
+        }
+    }
+
+    if (esperandoSoltar)
+    {
+        if (input.realDirection() != 0)
+        {
+            return true;
+        }
+        esperandoSoltar = false;
+        primeraVez = true; // El menu principal solo se redibuja cuando algo cambia
+    }
+
+    if (ahora - ultimaActividad >= TIEMPO_INACTIVIDAD)
+    {
+        animacionActiva = true;
+        screensaver::begin();
+        screensaver::update();
+        return true;
+    }
+    return false;
+}
+
 void SystemManager::begin()
 {
     Serial.begin(115200);
-    //
-    // delay(500);
 
-    // DEV_PRINTLN("--- INFORMACIÓN DEL SILICIO ---");
-
-    // DEV_PRINT("Modelo de ESP32: ");
-    // DEV_PRINTLN(ESP.getChipModel());
-
-    // DEV_PRINT("Núcleos de CPU: ");
-    // DEV_PRINTLN(ESP.getChipCores());
-
-    // DEV_PRINT("Tamaño de Flash: ");
-    // DEV_PRINT(ESP.getFlashChipSize() / (1024 * 1024));
-    // DEV_PRINTLN(" MB");
-
-    // DEV_PRINT("¿Tiene PSRAM?: ");
-    // if (psramInit())
-    // {
-    //     DEV_PRINT("SÍ, tamaño: ");
-    //     DEV_PRINT(ESP.getPsramSize() / 1024);
-    //     DEV_PRINTLN(" KB");
-    // }
-    // else
-    // {
-    //     DEV_PRINTLN("NO (Solo los 520KB de SRAM interna)");
-    // }
-    // DEV_PRINTLN("--------------------------------");
-
-    // //
     input.begin();
     InitDisplay();
     ClearDisplay();
@@ -68,9 +116,15 @@ void SystemManager::begin()
 
 void SystemManager::update()
 {
+    // Protector de pantalla: mientras esta activo se adueña de la pantalla y de los botones
+    if (animation())
+    {
+        return;
+    }
+
     if (currentState == STATE_MENU)
     {
-        // digitalWrite(2, LOW);
+
         // Actualizamos la lógica y guardamos si el usuario movió el menú
         bool huboMovimiento = MenuUpdate();
 
@@ -86,11 +140,6 @@ void SystemManager::update()
             int valor = MenuGetIndex();
             switch (valor)
             {
-                // case 0:
-                //     currentState = STATE_MENU;
-                //     DEV_PRINTLN("Switching to Menu");
-
-                //     break;
 
             case 0:
                 currentState = STATE_SNAKE;
@@ -111,7 +160,7 @@ void SystemManager::update()
                 break;
             case 4:
                 currentState = STATE_BIRD;
-                DEV_PRINT("Switching to Flappy Bird");
+                DEV_PRINTLN("Switching to Flappy Bird");
                 break;
 
             default:
@@ -236,7 +285,7 @@ void SystemManager::update()
             {
                 currentState = STATE_CONFIG;
                 wifiMenu.reset();
-                break; 
+                break;
             }
             wifiMenu.update();
             wifiMenu.render();

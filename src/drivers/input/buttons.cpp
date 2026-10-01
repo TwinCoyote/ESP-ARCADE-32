@@ -85,3 +85,27 @@ void InitButtons()
     DEV_PRINT(" val=");
     DEV_PRINTLN(digitalRead(BTN_RIGHT));
 }
+
+void Input::updateActivity()
+{
+    bool pressed = isPressed(BTN_OK) ||
+                   isPressed(BTN_BACK) ||
+                   isPressed(BTN_UP) ||
+                   isPressed(BTN_DOWN) ||
+                   isPressed(BTN_LEFT) ||
+                   isPressed(BTN_RIGHT);
+
+    // Cuenta mientras el boton siga abajo (no solo al presionarlo): quien mantiene ABAJO
+    // en Tetris o ARRIBA en Pong no esta inactivo
+    if (pressed)
+    {
+        buttonActivity = true;
+    }
+}
+
+bool Input::consumeButtonActivity()
+{
+    bool activity = buttonActivity;
+    buttonActivity = false;
+    return activity;
+}

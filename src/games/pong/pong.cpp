@@ -49,12 +49,12 @@ namespace pong
     bool start = false; // TODO: Hacer la condicion de que cuando alguno pierda se le ponga el marcador y
     // TODO -- para eso se necesita el bool start para que indique cuando aparezca y desaparezca
 
-    const int calcPositionX()
+    int calcPositionX()
     {
         return ball_x + (ball_velocity * ball_directionX);
     }
 
-    const int calcPositionY()
+    int calcPositionY()
     {
         return ball_y + (ball_velocity * ball_directionY);
     }
@@ -101,7 +101,6 @@ namespace pong
 
     void move_ball()
     {
-        int dir = input.realDirection();
         int expectedX = calcPositionX();
         int expectedY = calcPositionY();
 

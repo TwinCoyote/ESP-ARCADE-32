@@ -30,6 +30,7 @@ Prototipo actual: ESP32 DevKit, OLED SH1106 de 1.3 pulgadas y los botones montad
 | OTA                                      | Integración en progreso      |
 | Tetris                                   | Primera versión              |
 | Pantalla de información                  | Implementado                 |
+| Protector de pantalla                    | Implementado                 |
 | PCB ESP-ARCADE Rev B                     | Routing terminado            |
 
 > La aplicación que compila actualmente usa el pinout de ESP32 DevKit/Wokwi. El pinout de la PCB Rev B está documentado por separado y requiere una adaptación antes de usar el firmware en esa placa.
@@ -40,6 +41,7 @@ Prototipo actual: ESP32 DevKit, OLED SH1106 de 1.3 pulgadas y los botones montad
 - Compatible con controladores OLED SH1106 y SSD1306 mediante U8g2.
 - Menú navegable con seis botones: OK, BACK, UP, DOWN, LEFT y RIGHT.
 - Snake, Pong, Tetris y Flappy Bird incluidos.
+- Protector de pantalla: tras 30 segundos sin tocar los botones aparecen una mascota virtual, unos ojos flotantes y un video musical psicodélico.
 - Wi-Fi con escaneo de redes, conexión y credenciales persistentes en NVS.
 - Teclado virtual para introducir contraseñas desde la consola.
 - Servicios de red ejecutados en una tarea FreeRTOS independiente.
@@ -82,13 +84,13 @@ Para usar Wokwi, compila primero el entorno `esp32dev`. El firmware y el ELF esp
 
 ### Pruebas automáticas en Wokwi
 
-El escenario [test/wokwi/recorrido.yaml](test/wokwi/recorrido.yaml) recorre todas las pantallas (los juegos, Configuración, Wi-Fi e Info) presionando los botones simulados. Cada paso espera el mensaje del firmware por Serial, así que la prueba falla si una pantalla se cuelga, no responde o el ESP32 se reinicia. De paso guarda una captura de cada pantalla en `test/wokwi/screenshots/`.
+El escenario [test/wokwi/recorrido.yaml](test/wokwi/recorrido.yaml) recorre todas las pantallas (los juegos, Configuración, Wi-Fi e Info) presionando los botones simulados. Cada paso espera el mensaje del firmware por Serial, así que la prueba falla si una pantalla se cuelga, no responde o el ESP32 se reinicia. Al final deja la consola quieta hasta que arranca el protector de pantalla y comprueba que el botón que lo quita no abre el juego del menú. De paso guarda una captura de cada pantalla en `test/wokwi/screenshots/`.
 
 Para correrlo localmente (requiere `WOKWI_CLI_TOKEN` y firmware con `DEV_MODE=1`):
 
 ```bash
 pio run -e esp32dev
-wokwi-cli . --scenario test/wokwi/recorrido.yaml --timeout 90000
+wokwi-cli . --scenario test/wokwi/recorrido.yaml --timeout 150000
 ```
 
 En GitHub Actions el flujo es: compilar ambos entornos → probar en Wokwi (sube las capturas y el log serial como artefacto `wokwi-pantallas`) → publicar el release si el tag empieza con `v` y todo lo anterior pasó.
@@ -128,7 +130,7 @@ src/
 ├── core0/services/          Wi-Fi y OTA
 ├── drivers/                 Display, botones y tiempo
 ├── games/                   Snake, Pong, Tetris y Flappy Bird
-├── ui/                      Menú, teclado y configuración
+├── ui/                      Menú, teclado, configuración y protector de pantalla
 └── assets/                  Bitmaps y recursos gráficos
 ```
 
@@ -176,6 +178,18 @@ MENU
 - Gravedad y salto del pájaro.
 - Tuberías con huecos aleatorios.
 - Desplazamiento y detección de colisiones.
+
+## Protector de pantalla
+
+Si nadie toca un botón durante 30 segundos (`TIEMPO_INACTIVIDAD` en [src/core/system_manager.cpp](src/core/system_manager.cpp)), la pantalla se disuelve y empiezan a turnarse tres animaciones, con fundidos entre una y otra. Cualquier botón regresa a la pantalla donde estabas; esa pulsación solo despierta la consola (por ejemplo, `OK` no abre el juego del menú). Un juego en curso queda en pausa mientras tanto.
+
+- **Mascota** ([scene_pet.cpp](src/ui/screensaver/scene_pet.cpp)): un cachorro de coyote al estilo Tamagotchi. La primera vez nace de un huevo; después pasea, se come una pierna de pollo, brinca una pelota, hace popó (la limpia una ola) y se duerme. Los iconos del borde se encienden según lo que está haciendo.
+- **Ojos flotantes** ([scene_eyes.cpp](src/ui/screensaver/scene_eyes.cpp)): dos ojos que parpadean, miran alrededor con perspectiva y pasan por varios humores en orden aleatorio (feliz, sorprendido, guiño, enamorado, enojado, confundido) hasta quedarse dormidos.
+- **Video musical** ([scene_music.cpp](src/ui/screensaver/scene_music.cpp)): un video psicodélico armado para «Dracula» de Tame Impala (115 BPM). Abre con luna llena, murciélagos y el título, y cada frase de la letra entra con un efecto distinto: máquina de escribir, palabras que laten, onda, glitch, palabras apiladas, zoom en un túnel, reflector en la oscuridad, eco, remolino, caleidoscopio, letras que se derriten, cámara lenta o rayos de sol. Las partes sin letra son animaciones inspiradas en el video de «Feels Like We Only Go Backwards»: cabezas una dentro de otra que se alejan, figuras que giran y se derriten y un túnel del tiempo, con "colores" hechos de puntos.
+
+La letra de «Dracula» no viene incluida porque tiene derechos de autor: en la tabla `DRACULA` de [scene_music.cpp](src/ui/screensaver/scene_music.cpp) cada frase está vacía (`""`) y basta con escribirla entre las comillas para que aparezca con su efecto. Cualquier frase se acomoda sola en uno, dos o tres renglones con la fuente más grande que quepa (un `|` corta el renglón a mano), y mientras una frase esté vacía esa parte se ve como instrumental.
+
+Los sprites de la mascota están dibujados como texto (`#` = pixel encendido) para poder editarlos a mano.
 
 ## Wi-Fi y OTA
 

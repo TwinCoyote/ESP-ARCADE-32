@@ -18,6 +18,8 @@ public:
 
     void begin();
     void update();
+    // Protector de pantalla por inactividad; true mientras tiene la pantalla
+    bool animation();
 
     void setState(State s);
     State getState() const;

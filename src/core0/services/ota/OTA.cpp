@@ -9,7 +9,7 @@ OTAService::OTAService(String currentVersion, String user, String repo)
     _version = currentVersion;
     _user = user;
     _repo = repo;
-};
+}
 
 String OTAService::checkLatestVersion()
 {
@@ -51,7 +51,7 @@ String OTAService::checkLatestVersion()
 
     http.end();
     return String();
-};
+}
 
 bool OTAService::performUpdate()
 {
@@ -111,7 +111,7 @@ bool OTAService::performUpdate()
     }
 
     return false;
-};
+}
 
 void OTAService::saveVersion()
 {

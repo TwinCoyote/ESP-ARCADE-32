@@ -16,7 +16,7 @@ int indexMenu = 0;
 
 void MenuInit()
 {
-    indexMenu;
+    indexMenu=0;
 }
 
 bool MenuUpdate()
@@ -144,6 +144,5 @@ void MenuRender()
     DrawMenu();
     SetMenuFont();
     DrawTextCentered(35, options[indexMenu]);
-    DEV_PRINTLN(indexMenu);
     ActDisplay();
 }

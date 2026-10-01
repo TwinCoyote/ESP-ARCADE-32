@@ -26,7 +26,7 @@ private:
     unsigned int column;
     int mode = 0; // 0 = lowercase, 1 = uppercase, 2 = numbers
     String current_text = "";
-    String EntireWord = "";
+    
     bool submitPressed = false;
 
 public:

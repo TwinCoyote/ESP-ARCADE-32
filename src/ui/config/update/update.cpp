@@ -6,7 +6,6 @@
 UpdateMenu::UpdateMenu() : _ota(OTAService::readVersion().c_str(), "TwinCoyote", "ESP-ARCADE-32")
 {
     // _otaChecked = false;
-    ;
 }
 
 void UpdateMenu::displayUpdate()
@@ -30,5 +29,5 @@ void UpdateMenu::logicUpdateMenu()
         DEV_PRINTLN("[Update] Buscando actualizaciones de fondo...");
         // _otaChecked = true;
         _ota.performUpdate();
-    };
+    }
 }

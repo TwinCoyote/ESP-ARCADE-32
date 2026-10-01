@@ -83,6 +83,7 @@ void WifiMenu::scanNetworks()
             DEV_PRINTLN(ssid);
         }
     }
+    WiFi.scanDelete();
 
     lastScanTime = now;
 
@@ -251,7 +252,7 @@ void WifiMenu::handlePasswordEntry()
         {
             enteredPassword = keyboardPtr->getWord();
             DEV_PRINT("Password entered: ");
-            // String SecretPass = "";
+
             for (size_t i = 0; i < enteredPassword.length(); i++)
             {
                 SecretPass += "*";
@@ -266,7 +267,7 @@ void WifiMenu::handlePasswordEntry()
                 DEV_PRINTLN(selectedSSID);
                 DEV_PRINT("Using password: ");
                 // DEV_PRINTLN(enteredPassword);
-                
+
                 for (size_t i = 0; i < enteredPassword.length(); i++)
                 {
                     SecretPass += "*";

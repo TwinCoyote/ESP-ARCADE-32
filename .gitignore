@@ -3,7 +3,7 @@
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch
-Project_structure.txt
+Project_Structure.txt
 
 # Salidas de las pruebas de Wokwi
 test/wokwi/screenshots/*

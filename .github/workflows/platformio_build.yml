@@ -99,7 +99,7 @@ jobs:
       - name: Validar diagrama de Wokwi
         run: wokwi-cli lint
 
-      # Recorre todas las pantallas (juegos, configuracion, WiFi, Info y el easter egg).
+      # Recorre todas las pantallas (juegos, configuracion, WiFi, Info, el easter egg y el protector de pantalla).
       # Falla si un paso no ocurre a tiempo, si el ESP32 entra en panic o si se reinicia.
       - name: Recorrido por todas las pantallas
         if: env.WOKWI_CLI_TOKEN != ''
@@ -107,7 +107,7 @@ jobs:
           mkdir -p test/wokwi/screenshots
           wokwi-cli . \
             --scenario test/wokwi/recorrido.yaml \
-            --timeout 90000 \
+            --timeout 150000 \
             --fail-text "Guru Meditation" \
             --serial-log-file wokwi-serial.log
 
